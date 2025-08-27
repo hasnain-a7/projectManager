@@ -122,14 +122,15 @@ const TaskManager: React.FC = () => {
         </button>
       </div>
 
-      <TodoList
-        Todos={Todos}
-        updateTodo={openEdit}
-        deleteTodo={deleteTodo}
-        filteredList={filteredTasks}
-        searchInput={taskSearchInput}
-      />
-
+      <div className="task-list">
+        <TodoList
+          Todos={Todos}
+          updateTodo={openEdit}
+          deleteTodo={deleteTodo}
+          filteredList={filteredTasks}
+          searchInput={taskSearchInput}
+        />
+      </div>
       {showPopup && (
         <TodoModel
           formData={formData}

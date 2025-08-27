@@ -20,7 +20,7 @@ body {
   background-color: #d4d4d8;
   min-height: 70vh;
   padding: 20px;
-  border-radius: 12px;
+  border-radius: 10px;
 }
 
 .todo-title {
@@ -441,4 +441,12 @@ body {
   padding: 15px 20px;
 
   font-size: 20px;
+}
+.task-list {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
 }
