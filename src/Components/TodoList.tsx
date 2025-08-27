@@ -2,7 +2,7 @@ import React from "react";
 import TodoSingleList from "./TodoSingleList";
 
 interface Todo {
-  id: number;
+  id: string;
   title: string;
   todo: string;
   createdAt: string;
@@ -13,8 +13,8 @@ interface TodoListProps {
   Todos: Todo[];
   filteredList: Todo[];
   searchInput: string;
-  updateTodo: (id: number) => void;
-  deleteTodo: (idx: number) => void;
+  updateTodo: (id: string) => void;
+  deleteTodo: (idx: string) => void;
 }
 
 const TodoList: React.FC<TodoListProps> = ({

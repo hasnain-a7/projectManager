@@ -7,7 +7,7 @@ interface Props {
   >;
   onSubmit: () => void;
   onCancel: () => void;
-  editId: number | null;
+  editId: string | null;
 }
 
 const TodoModel: React.FC<Props> = ({

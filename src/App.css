@@ -450,3 +450,75 @@ body {
   flex-wrap: wrap;
   gap: 10px;
 }
+/* LoginPage.css */
+
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+  background-color: #1a202c;
+  font-family: Arial, sans-serif;
+}
+
+.login-container {
+  background-color: #888686;
+  padding: 40px 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  width: 350px;
+  text-align: center;
+}
+
+.login-title {
+  margin-bottom: 25px;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Optional: style for SignIn component if needed */
+.login-container input {
+  width: 90%;
+  padding: 10px 15px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+.login-container button {
+  width: 50%;
+  padding: 10px 15px;
+  border-radius: 6px;
+  border: none;
+  background-color: #1a202c;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.login-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-family: Arial, sans-serif;
+}
+.login-container {
+  background-color: #ebe8e8;
+  padding: 40px 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  width: 350px;
+  text-align: center;
+}
+.label {
+  display: block;
+  text-align: left;
+  margin-bottom: 8px;
+  margin-left: 15px;
+  font-weight: 500;
+  color: #333;
+}

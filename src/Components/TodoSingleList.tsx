@@ -2,14 +2,14 @@ import React from "react";
 
 interface TodoSingleListProps {
   item: {
-    id: number;
+    id: string;
     title: string;
     todo: string;
     createdAt: string;
     completed: boolean;
   };
-  updateTodo: (id: number) => void;
-  deleteTodo: (idx: number) => void;
+  updateTodo: (id: string) => void;
+  deleteTodo: (idx: string) => void;
 }
 
 const TodoSingleList: React.FC<TodoSingleListProps> = ({

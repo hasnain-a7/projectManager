@@ -3,8 +3,17 @@ import "../App.css";
 import TodoList from "./TodoList";
 import TodoModel from "./TodoModel";
 import SearchInput from "./SearchInput";
+import { db } from "../Config/firbase";
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  getDocs,
+} from "firebase/firestore";
 interface Todo {
-  id: number;
+  id: string;
   title: string;
   completed: boolean;
   createdAt: string;
@@ -24,19 +33,35 @@ const TaskManager: React.FC = () => {
     title: "",
     description: "",
   });
-  const [editId, setEditId] = useState<number | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
   const [showPopup, setShowPopup] = useState<boolean>(false);
   const [taskSearchInput, settaskSearchInput] = useState<string>("");
   const [filteredTasks, setfilteredTasks] = useState<Todo[]>([]);
 
+  const todoCollectionRef = collection(db, "todos");
   useEffect(() => {
-    localStorage.setItem("todos", JSON.stringify(Todos));
-  }, [Todos]);
+    const fetchTodos = async () => {
+      try {
+        const querySnapshot = await getDocs(todoCollectionRef);
 
-  const addTodo = () => {
+        const finalTodo: Todo[] = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as Omit<Todo, "id">),
+        }));
+
+        setTodos(finalTodo);
+        console.log("Fetched todos:", finalTodo);
+      } catch (error: string | any) {
+        console.error("Error fetching todos: ", error.message);
+      }
+    };
+
+    fetchTodos();
+  }, []);
+
+  const addTodo = async () => {
     if (formData.title.length > 3 && formData.description) {
-      const newTodo: Todo = {
-        id: Math.floor(Math.random() * 1000) + 1,
+      const newTodo = {
         title: formData.title,
         completed: false,
         createdAt: new Date().toLocaleString("en-GB", {
@@ -49,23 +74,37 @@ const TaskManager: React.FC = () => {
         }),
         todo: formData.description,
       };
-      setTodos([...Todos, newTodo]);
+
+      const docRef = await addDoc(collection(db, "todos"), newTodo);
+
+      setTodos([...Todos, { id: docRef.id, ...newTodo }]);
+
       resetForm();
     } else {
       alert("Please enter valid title (min 3 chars) and description.");
     }
   };
 
-  const updateTodo = () => {
+  const updateTodo = async () => {
     if (editId !== null) {
-      setTodos(
-        Todos.map((t) =>
-          t.id === editId
-            ? { ...t, title: formData.title, todo: formData.description }
-            : t
-        )
-      );
-      resetForm();
+      try {
+        const todoRef = doc(db, "todos", editId);
+        await updateDoc(todoRef, {
+          title: formData.title,
+          todo: formData.description,
+        });
+
+        setTodos(
+          Todos.map((t) =>
+            t.id === editId
+              ? { ...t, title: formData.title, todo: formData.description }
+              : t
+          )
+        );
+        resetForm();
+      } catch (err) {
+        console.error("Error updating todo:", err);
+      }
     }
   };
 
@@ -74,13 +113,18 @@ const TaskManager: React.FC = () => {
     else updateTodo();
   };
 
-  const deleteTodo = (id: number) => {
+  const deleteTodo = async (id: string) => {
     if (window.confirm("Delete this todo?")) {
-      setTodos(Todos.filter((t) => t.id !== id));
+      try {
+        await deleteDoc(doc(db, "todos", id));
+        setTodos(Todos.filter((t) => t.id !== id));
+      } catch (err) {
+        console.error("Error deleting todo:", err);
+      }
     }
   };
 
-  const openEdit = (id: number) => {
+  const openEdit = (id: string) => {
     const t = Todos.find((todo) => todo.id === id);
     if (t) {
       setFormData({ title: t.title, description: t.todo });
@@ -105,7 +149,6 @@ const TaskManager: React.FC = () => {
           todo.todo.toLowerCase().includes(value)
       );
       setfilteredTasks(filteredTasks);
-      console.log(filteredTasks);
     }
   };
 
