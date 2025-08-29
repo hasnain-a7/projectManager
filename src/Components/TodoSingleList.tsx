@@ -8,6 +8,7 @@ interface TodoSingleListProps {
     createdAt: string;
     completed: boolean;
   };
+  taskColor: string | null;
   updateTodo: (id: string) => void;
   deleteTodo: (idx: string) => void;
 }
@@ -15,11 +16,16 @@ interface TodoSingleListProps {
 const TodoSingleList: React.FC<TodoSingleListProps> = ({
   item,
   updateTodo,
+  taskColor,
   deleteTodo,
 }) => {
   return (
     <li className="todo-list-item">
-      <div className="todo-item-content">
+      <div
+        className={`todo-item-content bg-amber-100 ${
+          taskColor === item.id ? "bg-green-300" : "bg-white"
+        }`}
+      >
         <div className="todo-item-text">
           <h3 className="todo-item-title">Title: {item.title}</h3>
           <p className="todo-item-task">Description: {item.todo}</p>

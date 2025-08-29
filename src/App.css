@@ -1,28 +1,25 @@
-/* Todo App Styles */
-/* Reset default browser spacing */
+@import "tailwindcss";
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
-
 html,
 body {
   height: 100%;
   width: 100%;
 }
-
 .todo-app {
-  max-width: 80%;
-  margin: 0 auto;
+  width: 100%;
+  position: relative;
+  margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
     Ubuntu, Cantarell, sans-serif;
   background-color: #d4d4d8;
-  min-height: 70vh;
-  padding: 20px;
+  min-height: 100%;
+  padding: 5px;
   border-radius: 10px;
 }
-
 .todo-title {
   background-color: #1a202c;
   color: white;
@@ -32,24 +29,20 @@ body {
   font-size: 24px;
   font-weight: 600;
 }
-
 .todo-input-title {
   width: 92%;
   padding: 12px 15px;
   margin: 10px 0;
   margin-bottom: 15px;
-
   border: none;
   color: #1a202c;
-
   border-radius: 8px;
   font-size: 16px;
   background-color: #f9f9f9;
-
   outline: none;
 }
 .todo-input-task {
-  width: 92%;
+  width: 100%;
   min-height: 100px;
   padding: 12px 15px;
   margin: 10px 0;
@@ -62,12 +55,10 @@ body {
   transition: all 0.3s ease;
   background-color: #f9f9f9;
 }
-
 .todo-input-title::placeholder,
 .todo-input-task::placeholder {
   color: #313030;
 }
-
 .todo-btn {
   display: block;
   margin: 8px auto;
@@ -75,24 +66,20 @@ body {
   background-color: #1a202c;
   color: white;
   border: none;
-
   border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s;
 }
-
 .todo-btn:hover {
   background-color: #2d3748;
 }
-
 .todo-list {
   list-style: none;
   padding: 0 20px;
-  margin: 0;
+  margin-top: 15px;
 }
-
 .todo-list-item {
   margin-bottom: 10px;
 }
@@ -113,7 +100,6 @@ body {
   flex-wrap: wrap;
   gap: 10px;
 }
-
 .todo-item-title {
   margin: 0;
   font-size: 18px;
@@ -122,14 +108,12 @@ body {
   flex: 1;
   min-width: 200px;
 }
-
 .todo-item-task {
   margin: 5px 0;
   color: #333333;
   flex: 1;
   min-width: 200px;
 }
-
 .todo-item-status {
   margin: 5px 0;
   font-size: 14px;
@@ -137,7 +121,6 @@ body {
   flex: 1;
   min-width: 120px;
 }
-
 .todo-item-date {
   margin: 5px 0;
   font-size: 12px;
@@ -145,7 +128,6 @@ body {
   flex: 1;
   min-width: 100px;
 }
-
 .todo-update-btn,
 .todo-delete-btn {
   padding: 8px 16px;
@@ -157,33 +139,26 @@ body {
   transition: background-color 0.2s;
   margin-left: 5px;
 }
-
 .todo-update-btn {
   background-color: #1a202c;
   color: white;
 }
-
 .todo-update-btn:hover {
   background-color: #1a202c;
 }
-
 .todo-delete-btn {
   background-color: #e53e3e;
   color: white;
 }
-
 .todo-delete-btn:hover {
   background-color: #c53030;
-}
-
-/* Responsive adjustments */
+} /* Responsive adjustments */
 @media (max-width: 768px) {
   .todo-item-content {
     flex-direction: column;
     align-items: stretch;
     text-align: left;
   }
-
   .todo-item-title,
   .todo-item-task,
   .todo-item-status,
@@ -191,16 +166,12 @@ body {
     min-width: auto;
     margin: 2px 0;
   }
-
   .todo-update-btn,
   .todo-delete-btn {
     margin: 5px 5px 0 0;
     display: inline-block;
   }
-}
-/* Search Input and Button Styles */
-
-/* Overlay background */
+} /* Search Input and Button Styles */ /* Overlay background */
 #popup-overlay {
   position: fixed;
   width: 450px;
@@ -210,33 +181,26 @@ body {
   justify-content: center;
   align-items: center;
   z-index: 1000;
-}
-
-/* Popup container */
+} /* Popup container */
 #popup {
   background: #fff;
   padding: 10px;
   border-radius: 12px;
   width: 450px;
-
   position: relative;
   display: flex;
   align-items: center;
   flex-direction: column;
   gap: 15px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-}
-
-/* Title */
+} /* Title */
 #popup-title {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
   color: #2d3748;
   text-align: center;
-}
-
-/* Textarea */
+} /* Textarea */
 .popup-textarea {
   padding: 10px 12px;
   border: 1px solid #ddd;
@@ -246,21 +210,16 @@ body {
   resize: vertical;
   min-height: 100px;
 }
-
 .popup-textarea:focus {
   border-color: #3182ce;
   box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.2);
-}
-
-/* Actions (buttons row) */
+} /* Actions (buttons row) */
 #popup-actions {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 10px;
-}
-
-/* Buttons */
+} /* Buttons */
 #popup-save-btn,
 #popup-cancel-btn {
   padding: 10px 16px;
@@ -270,21 +229,16 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-}
-
-/* Save button */
+} /* Save button */
 #popup-save-btn {
   background: #2b3444;
   color: #fff;
-}
-
-/* Cancel button */
+} /* Cancel button */
 #popup-cancel-btn {
   background: #f1f5f9;
   color: #374151;
   border: 1px solid #d1d5db;
 }
-
 #popup-cancel-btn:hover {
   background: #e5e7eb;
   color: #111827;
@@ -297,7 +251,6 @@ body {
   justify-content: center;
   align-items: center;
 }
-
 .popup {
   background: #fff;
   padding: 20px;
@@ -311,22 +264,27 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 .add-btn {
-  padding: 8px 14px;
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
   border: none;
-  margin: 10px;
-  border-radius: 6px;
+  border-radius: 50%; /* makes it perfectly round */
   cursor: pointer;
-  font-size: 14px;
+  font-size: 18px; /* bigger text/icon inside */
   background-color: #1a202c;
   color: white;
   transition: 0.2s;
+  display: flex; /* center text/icon */
+  justify-content: center;
+  align-items: center;
 }
 .popup h3 {
   margin: 0;
   font-size: 18px;
   text-align: center;
 }
-
 .popup input,
 .popup textarea {
   width: 100%;
@@ -336,12 +294,10 @@ body {
   font-size: 14px;
   outline: none;
 }
-
 .popup input:focus,
 .popup textarea:focus {
   border-color: #007bff;
 }
-
 .popup-actions {
   display: flex;
   justify-content: center;
@@ -349,7 +305,6 @@ body {
   gap: 10px;
   margin-top: 8px;
 }
-
 .popup-actions button {
   padding: 8px 14px;
   border: none;
@@ -358,25 +313,20 @@ body {
   font-size: 14px;
   transition: 0.2s;
 }
-
 .popup-actions button:first-child {
   background: #2b3444;
   color: #fff;
 }
-
 .popup-actions button:first-child:hover {
   background: #2b3444;
 }
-
 .popup-actions button:last-child {
   background: #f5f5f5;
   color: #333;
 }
-
 .popup-actions button:last-child:hover {
   background: #ddd;
 }
-
 .close-btn {
   position: absolute;
   top: 8px;
@@ -387,12 +337,25 @@ body {
   cursor: pointer;
 }
 .search-input {
-  width: 70%;
+  width: 92%;
+  margin-bottom: "20px";
   padding: 10px 12px;
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 14px;
   outline: none;
+}
+.search-btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  background-color: #1a202c;
+  color: white;
+  transition: background-color 0.2s;
+  margin-left: 5px;
 }
 .Search-box {
   display: flex;
@@ -402,7 +365,6 @@ body {
   margin-top: 10px;
   margin-bottom: 10px;
 }
-
 .home-page {
   height: 100vh;
   width: 100%;
@@ -411,27 +373,49 @@ body {
   min-height: 100vh;
   margin: 0;
 }
-
-.navbar {
-  background: #1a202c;
-  color: #fff;
-  display: flex;
-  justify-content: center;
-
-  align-items: center;
-  padding: 15px 40px;
-}
 .logo {
   font-size: 24px;
   font-weight: 700;
 }
-
+.account-container {
+  position: relative;
+}
+.taskImage {
+  height: 30px;
+}
+.Account {
+  cursor: pointer;
+  font-size: 24px;
+  color: #ffffff;
+  padding: 5px;
+  transition: color 0.2s ease;
+}
+.dropdown {
+  position: absolute;
+  top: 40px; /* below the icon */
+  right: 0;
+  background: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 10px;
+  min-width: 120px;
+  z-index: 100;
+  animation: fadeIn 0.2s ease-in-out;
+}
+.dropdown button {
+  background: #1a202c;
+  color: #f1f5f9;
+  border: none;
+  padding: 8px 12px;
+  width: 100%;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
 .main-content {
   flex: 1;
-  padding: 10px;
   background: #f9f9f9;
 }
-
 .footer {
   height: 80px;
   margin: 0;
@@ -439,19 +423,15 @@ body {
   color: #ddd;
   text-align: center;
   padding: 15px 20px;
-
   font-size: 20px;
 }
 .task-list {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: row;
   flex-wrap: wrap;
-  gap: 10px;
-}
-/* LoginPage.css */
-
+  justify-content: center; /* center items horizontally */
+  gap: 10px; /* space between todos */
+  padding: 10px;
+} /* LoginPage.css */
 .login-page {
   display: flex;
   justify-content: center;
@@ -460,7 +440,6 @@ body {
   background-color: #1a202c;
   font-family: Arial, sans-serif;
 }
-
 .login-container {
   background-color: #888686;
   padding: 40px 30px;
@@ -469,15 +448,12 @@ body {
   width: 350px;
   text-align: center;
 }
-
 .login-title {
   margin-bottom: 25px;
   font-size: 24px;
   font-weight: 600;
   color: #333;
-}
-
-/* Optional: style for SignIn component if needed */
+} /* Optional: style for SignIn component if needed */
 .login-container input {
   width: 90%;
   padding: 10px 15px;
@@ -486,7 +462,6 @@ body {
   border: 1px solid #ccc;
   font-size: 16px;
 }
-
 .login-container button {
   width: 50%;
   padding: 10px 15px;
@@ -498,12 +473,10 @@ body {
   cursor: pointer;
   transition: 0.3s;
 }
-
 .login-box {
   display: flex;
   justify-content: center;
   align-items: center;
-
   font-family: Arial, sans-serif;
 }
 .login-container {
