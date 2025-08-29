@@ -9,7 +9,7 @@ import { TfiAlignJustify } from "react-icons/tfi";
 
 const Layout = () => {
   const navigate = useNavigate();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // default open
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -50,7 +50,7 @@ const Layout = () => {
         </div>
 
         <div className="flex flex-col flex-1 min-w-0">
-          <main className="flex-1 p-6 bg-gray-100 overflow-y-auto">
+          <main className="flex-1  bg-gray-100 overflow-y-auto">
             <Outlet />
           </main>
         </div>

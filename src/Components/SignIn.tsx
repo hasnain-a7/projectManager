@@ -64,12 +64,14 @@ const SignIn: React.FC = () => {
       setLoading(false);
     }
   };
-
+  const handleNavigtion = () => {
+    navigate("/home");
+  };
   if (user && user.email) {
     return (
       <div className="login-box">
         <p>✅ You're signed in as {user.email}</p>
-        <button onClick={() => navigate("/home")}>Go to Home</button>
+        <button onClick={handleNavigtion}>Go to Home</button>
       </div>
     );
   }
@@ -78,9 +80,12 @@ const SignIn: React.FC = () => {
   };
 
   return (
-    <div className="login-box">
-      <form onSubmit={handleLoginSubmit}>
-        <div>
+    <div className="flex flex-col items-center gap-4">
+      <form
+        onSubmit={handleLoginSubmit}
+        className="w-full flex flex-col items-center gap-4"
+      >
+        <div className="w-full">
           <input
             type="email"
             id="email"
@@ -89,9 +94,18 @@ const SignIn: React.FC = () => {
             placeholder="Enter your email"
             required
             disabled={loading}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1a202c] disabled:bg-gray-100 disabled:cursor-not-allowed"
           />
         </div>
-        <button type="submit" disabled={loading || !email.trim()}>
+        <button
+          type="submit"
+          disabled={loading || !email.trim()}
+          className={`w-full px-4 py-2 rounded-lg text-white font-medium transition-colors duration-200 cursor-pointer ${
+            loading || !email.trim()
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-[#1a202c] hover:bg-gray-700"
+          }`}
+        >
           {loading ? "Processing" : "Login"}
         </button>
       </form>

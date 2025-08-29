@@ -61,8 +61,8 @@ const TaskManager: React.FC = () => {
         const querySnapshot = await getDocs(q);
 
         const todosData = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
           ...doc.data(),
+          id: doc.id,
         })) as Todo[];
 
         console.log("Fetched todos:", todosData);
@@ -70,7 +70,7 @@ const TaskManager: React.FC = () => {
       } catch (error) {
         console.error("Error fetching todos:", error);
       } finally {
-        setLoading(false); // stop loader
+        setLoading(false);
       }
     };
 
@@ -91,7 +91,7 @@ const TaskManager: React.FC = () => {
       sethighlightedTask(docRef.id);
       setTimeout(() => {
         sethighlightedTask(null);
-      }, 4000);
+      }, 3000);
       resetForm();
     } else {
       alert("Please enter valid title and description.");
@@ -170,18 +170,22 @@ const TaskManager: React.FC = () => {
   };
 
   return (
-    <div className="todo-app">
-      <div className="Search-box">
+    <div className="w-full h-full relative font-sans bg-gray-300 p-1.5 ">
+      <div className="flex justify-center items-center gap-2 my-2  w-[90%] mx-auto">
         <SearchInput
           taskSearchInput={taskSearchInput}
           handleTaskSearch={handleTaskSearch}
         />
-        <button className="search-btn">
+        <button className="px-4 py-2 mb-3 bg-[#1a202c] text-white text-sm font-medium rounded-md cursor-pointer transition-colors duration-200 hover:bg-gray-700">
           <FaSearch />
         </button>
       </div>
-      <button className="add-btn" onClick={() => setShowPopup(true)}>
-        <FaPlus color="white" size={16} />
+
+      <button
+        onClick={() => setShowPopup(true)}
+        className="fixed bottom-8 right-8 w-12 h-12 flex items-center justify-center rounded-full bg-gray-900 text-white text-lg shadow-md hover:scale-105 transition-transform"
+      >
+        <FaPlus size={18} />
       </button>
 
       <div>
