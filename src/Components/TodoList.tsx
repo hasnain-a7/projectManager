@@ -40,7 +40,7 @@ const TodoList: React.FC<TodoListProps> = ({
             />
           ))
         ) : (
-          <li className="text-[#1a202c] font-medium flex justify-center items-center text-center w-full pt-96">
+          <li className="text-[#1a202c] font-medium flex justify-center items-center text-center w-full pt-20">
             <p>Todo not found</p>
           </li>
         )
