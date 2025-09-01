@@ -21,7 +21,7 @@ const SignIn: React.FC = () => {
       setUser(currentUser);
 
       if (currentUser && currentUser.email) {
-        navigate("/app");
+        navigate("/");
       }
     });
 
@@ -65,7 +65,7 @@ const SignIn: React.FC = () => {
     }
   };
   const handleNavigtion = () => {
-    navigate("/home");
+    navigate("/");
   };
   if (user && user.email) {
     return (

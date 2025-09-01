@@ -29,11 +29,11 @@ const AccountDropdown = ({ onLogout }: { onLogout: () => void }) => {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-48 bg-[#1a202c] shadow-lg rounded-sm border border-gray-200 dark:border-gray-800 z-50">
+        <div className="absolute left-0 bottom-full mb-2 w-44 bg-[#1a202c] shadow-lg rounded-sm border border-gray-200 dark:border-gray-800 z-50">
           <ul className="py-2 text-sm">
             <li>
               <Link
-                to="/app/profile"
+                to="/profile"
                 className="flex items-center w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800"
               >
                 <FaUser className="w-4 h-4 mr-2" />
