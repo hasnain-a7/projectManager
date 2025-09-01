@@ -15,17 +15,23 @@ import DashboarPage from "./Pages/DashboardPage";
 import AddTaskPage from "./Pages/AddTaskPage";
 import ProfilePage from "./Pages/ProfilePage";
 import DetailPage from "./Pages/DetailPage";
+import ImportedTaskPage from "./Pages/ImportedTaskPage";
+import CompeletedTaskPage from "./Pages/CompeletedTaskPage";
+import PersonalPage from "./Pages/PersonalPage";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-      <Route path="/" element={<LoginPage />} />
-      <Route path="app" element={<Layout />}>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/" element={<Layout />}>
         <Route index element={<TaskManager />} />
-        <Route path="/app/dashboard" element={<DashboarPage />} />
-        <Route path="/app/add-task" element={<AddTaskPage />} />
-        <Route path="/app/profile" element={<ProfilePage />} />
-        <Route path="/app/task/detail" element={<DetailPage />} />
+        <Route path="/dashboard" element={<DashboarPage />} />
+        <Route path="/add-task" element={<AddTaskPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/important" element={<ImportedTaskPage />} />
+        <Route path="/completed" element={<CompeletedTaskPage />} />
+        <Route path="/personal" element={<PersonalPage />} />
+        <Route path="/task/detail" element={<DetailPage />} />
       </Route>
     </>
   )
