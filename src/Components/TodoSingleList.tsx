@@ -1,4 +1,5 @@
 import React from "react";
+import { useTaskContext } from "../TaskContext/TaskContext";
 
 interface TodoSingleListProps {
   item: {
@@ -9,18 +10,12 @@ interface TodoSingleListProps {
     completed: boolean;
   };
   taskColor: string | null;
-  updateTodo: (id: string) => void;
-  deleteTodo: (idx: string) => void;
 }
 
-const TodoSingleList: React.FC<TodoSingleListProps> = ({
-  item,
-  updateTodo,
-  taskColor,
-  deleteTodo,
-}) => {
+const TodoSingleList: React.FC<TodoSingleListProps> = ({ item, taskColor }) => {
+  const { openEdit, deleteTodo } = useTaskContext();
   return (
-    <li className="mb-2.5 ">
+    <li className="mb-2.5">
       <div
         className={`p-5 rounded-lg shadow-md flex justify-between items-center flex-wrap gap-2.5 max-md:flex-col max-md:items-stretch max-md:text-left ${
           taskColor === item.id ? "bg-green-300" : "bg-white"
@@ -41,7 +36,7 @@ const TodoSingleList: React.FC<TodoSingleListProps> = ({
         <div className="flex gap-1">
           <button
             className="py-2 px-4 border-none rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 ml-1 bg-[#1a202c] text-white hover:bg-[#1a202c] max-md:my-1 max-md:mr-1 max-md:inline-block"
-            onClick={() => updateTodo(item.id)}
+            onClick={() => openEdit(item.id)}
           >
             Edit
           </button>

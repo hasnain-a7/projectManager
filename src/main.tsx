@@ -18,6 +18,7 @@ import DetailPage from "./Pages/DetailPage";
 import ImportedTaskPage from "./Pages/ImportedTaskPage";
 import CompeletedTaskPage from "./Pages/CompeletedTaskPage";
 import PersonalPage from "./Pages/PersonalPage";
+import { TaskProvider } from "./TaskContext/TaskContext";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -40,6 +41,8 @@ const router = createBrowserRouter(
 const root = ReactDOM.createRoot(document.getElementById("root")!);
 root.render(
   <UserProvider>
-    <RouterProvider router={router} />
+    <TaskProvider>
+      <RouterProvider router={router} />
+    </TaskProvider>
   </UserProvider>
 );

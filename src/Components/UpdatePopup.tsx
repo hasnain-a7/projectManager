@@ -1,22 +1,20 @@
 import React from "react";
+import { useTaskContext } from "../TaskContext/TaskContext";
 
-interface UpdatePopupProps {
-  updatedTitle: string;
-  handleTitle: React.Dispatch<React.SetStateAction<string>>;
-  updatediscription: string;
-  handleDiscription: React.Dispatch<React.SetStateAction<string>>;
-  saveTodo: () => void;
-  cancelUpdate: () => void;
-}
+const UpdatePopup: React.FC = () => {
+  const { formData, setFormData, handleSubmit, setShowPopup } =
+    useTaskContext();
 
-const UpdatePopup: React.FC<UpdatePopupProps> = ({
-  updatedTitle,
-  handleTitle,
-  updatediscription,
-  handleDiscription,
-  saveTodo,
-  cancelUpdate,
-}) => {
+  const handleTitle = (value: string) => {
+    setFormData({ ...formData, title: value });
+  };
+
+  const handleDescription = (value: string) => {
+    setFormData({ ...formData, description: value });
+  };
+
+  const cancelUpdate = () => setShowPopup(false);
+
   return (
     <div id="popup-overlay">
       <div id="popup">
@@ -24,19 +22,19 @@ const UpdatePopup: React.FC<UpdatePopupProps> = ({
         <input
           type="text"
           placeholder="Enter updated Title"
-          value={updatedTitle}
+          value={formData.title}
           onChange={(e) => handleTitle(e.target.value)}
         />
         <textarea
           className="popup-textarea"
           name="popup-description"
-          value={updatediscription}
-          onChange={(e) => handleDiscription(e.target.value)}
+          value={formData.description}
+          onChange={(e) => handleDescription(e.target.value)}
           placeholder="Enter updated description..."
           rows={4}
         />
         <div id="popup-actions">
-          <button id="popup-save-btn" onClick={saveTodo}>
+          <button id="popup-save-btn" onClick={handleSubmit}>
             Update
           </button>
           <button id="popup-cancel-btn" onClick={cancelUpdate}>
