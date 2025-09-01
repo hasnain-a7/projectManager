@@ -14,7 +14,7 @@ const Layout: React.FC = () => {
     try {
       await signOut(auth);
       console.log("user log out");
-      navigate("/login");
+      navigate("/");
     } catch (error: any) {
       console.error("Logout error:", error.message);
     }

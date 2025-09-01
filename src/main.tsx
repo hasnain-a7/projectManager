@@ -19,7 +19,7 @@ import DetailPage from "./Pages/DetailPage";
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/" element={<LoginPage />} />
       <Route path="app" element={<Layout />}>
         <Route index element={<TaskManager />} />
         <Route path="/app/dashboard" element={<DashboarPage />} />
