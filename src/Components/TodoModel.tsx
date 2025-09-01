@@ -1,5 +1,5 @@
 import React from "react";
-
+import { useState } from "react";
 interface Props {
   formData: { title: string; description: string };
   setFormData: React.Dispatch<
@@ -17,6 +17,7 @@ const TodoModel: React.FC<Props> = ({
   onCancel,
   editId,
 }) => {
+  const [loading, setloading] = useState<boolean>(false);
   const HandleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((pre) => ({
       ...pre,
@@ -30,6 +31,11 @@ const TodoModel: React.FC<Props> = ({
       ...pre,
       description: e.target.value,
     }));
+  };
+  const handleSubmit = () => {
+    setloading(true);
+    onSubmit();
+    setloading(false);
   };
 
   return (
@@ -57,14 +63,14 @@ const TodoModel: React.FC<Props> = ({
 
         <div className="flex justify-end gap-3">
           <button
-            onClick={onSubmit}
-            className="px-4 py-2 bg-[#1A202C] text-white rounded-lg "
+            onClick={handleSubmit}
+            className="px-4 py-2 bg-[#1A202C] text-white rounded-lg cursor-pointer"
           >
-            {editId === null ? "Add" : "Update"}
+            {loading ? "Loading..." : editId === null ? "Add" : "Update"}
           </button>
           <button
             onClick={onCancel}
-            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition cursor-pointer"
           >
             Cancel
           </button>

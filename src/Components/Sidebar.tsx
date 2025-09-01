@@ -1,6 +1,10 @@
 import { RxCross2 } from "react-icons/rx";
 import { NavLink } from "react-router-dom";
-
+import { MdDashboardCustomize } from "react-icons/md";
+import { IoMdAddCircle } from "react-icons/io";
+import { CgAdidas } from "react-icons/cg";
+import { CgAlignLeft } from "react-icons/cg";
+import { CgCalendarDue } from "react-icons/cg";
 interface SidebarProps {
   isOpen: boolean;
   toggleSidebar: () => void;
@@ -9,7 +13,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
   return (
     <aside
-      className={`fixed top-0 left-0 z-50 flex flex-col h-full w-52 bg-[#1a202c] text-white overflow-y-auto transition-transform duration-300 ease-in-out p-4
+      className={`fixed top-0 left-0 z-50 flex flex-col h-full w-52 bg-[#1a202c] text-white overflow-y-auto transition-transform duration-300 ease-in-out p-3
         ${isOpen ? "translate-x-0" : "-translate-x-full"}
       `}
     >
@@ -23,18 +27,39 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
           onClick={toggleSidebar}
           className="text-gray-200 hover:bg-gray-700 hover:text-white pointer-coarse"
         >
-          <RxCross2 className="h-6 w-6" />
+          <RxCross2 className="h-6 w-6 cursor-pointer" />
         </button>
       </div>
-      <div className="mt-4 h-full flex flex-col justify-between pb-4">
+      <div className="mt-8 h-full flex flex-col justify-between pb-4">
         <nav>
           <ul className="flex flex-col gap-2 p-2 font-medium">
             {[
-              { name: "Dashboard", path: "/" },
-              { name: "Sports Task", path: "/today" },
-              { name: "Student Task", path: "/important" },
-              { name: "Gym Task", path: "/completed" },
-              { name: "Personal Task", path: "/personal" },
+              { name: "home", path: "/app", icons: <CgCalendarDue /> },
+              {
+                name: "Dashboard",
+                path: "/app/dashboard",
+                icons: <MdDashboardCustomize />,
+              },
+              {
+                name: "Add Task",
+                path: "/app/add-task",
+                icons: <IoMdAddCircle />,
+              },
+              {
+                name: "Student Task",
+                path: "/important",
+                icons: <CgAlignLeft />,
+              },
+              {
+                name: "Gym Task",
+                path: "/completed",
+                icons: <CgAdidas />,
+              },
+              {
+                name: "Personal Task",
+                path: "/personal",
+                icons: <CgCalendarDue />,
+              },
             ].map((item) => (
               <li key={item.name}>
                 <NavLink
@@ -47,7 +72,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
                     }`
                   }
                 >
-                  <span>{item.name}</span>
+                  <span className="flex justify-between items-center gap-2 text-[15px]">
+                    {item.icons}
+                    {item.name}
+                  </span>
                 </NavLink>
               </li>
             ))}

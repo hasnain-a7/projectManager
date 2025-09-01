@@ -7,17 +7,21 @@ import AccountDropdown from "../Components/NavBarAccount";
 import { useState } from "react";
 import { TfiAlignJustify } from "react-icons/tfi";
 
-const Layout = () => {
+const Layout: React.FC = () => {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigate("/");
+      console.log("user log out");
+      navigate("/login");
     } catch (error: any) {
       console.error("Logout error:", error.message);
     }
+  };
+  const handleSidbar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
   return (
@@ -25,8 +29,8 @@ const Layout = () => {
       <nav className="w-full h-[60px] flex justify-between items-center bg-[#1a202c] text-white p-3">
         <div className="flex justify-between items-center w-full">
           <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-2 hover:bg-gray-700 rounded-lg transition-colors duration-200"
+            onClick={handleSidbar}
+            className="p-2 hover:bg-gray-700 rounded-lg transition-colors duration-200 cursor-pointer"
           >
             <TfiAlignJustify className="w-6 h-6" />
           </button>
@@ -42,15 +46,12 @@ const Layout = () => {
           }`}
         >
           {isSidebarOpen && (
-            <Sidebar
-              isOpen={isSidebarOpen}
-              toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-            />
+            <Sidebar isOpen={isSidebarOpen} toggleSidebar={handleSidbar} />
           )}
         </div>
 
-        <div className="flex flex-col flex-1 min-w-0">
-          <main className="flex-1  bg-gray-100 overflow-y-auto">
+        <div className="flex flex-col flex-1 min-w-0 h-screen overflow-hidden">
+          <main className="flex-1 max-h-full  bg-gray-100 overflow-y-auto">
             <Outlet />
           </main>
         </div>

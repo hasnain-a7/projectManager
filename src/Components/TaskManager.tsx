@@ -3,9 +3,11 @@ import "../App.css";
 import TodoList from "./TodoList";
 import TodoModel from "./TodoModel";
 import SearchInput from "./SearchInput";
-import { db } from "../Config/firbase";
+import { db, auth } from "../Config/firbase";
 import { FaPlus } from "react-icons/fa";
 import { FaSearch } from "react-icons/fa";
+import { onAuthStateChanged } from "firebase/auth";
+
 import {
   collection,
   addDoc,
@@ -17,6 +19,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { useUserContextId } from "../AuthContext/UserContext";
+import Loader from "./Loader";
 
 interface Todo {
   id: string;
@@ -47,35 +50,41 @@ const TaskManager: React.FC = () => {
   const { userContextId } = useUserContextId();
 
   useEffect(() => {
-    const fetchTodos = async () => {
-      if (!userContextId) return;
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const fetchTodos = async () => {
+          try {
+            setLoading(true);
+            console.log("Fetching todos for userId:", user.uid);
 
-      try {
-        setLoading(true);
-        console.log("Fetching todos for userId:", userContextId);
+            const q = query(
+              collection(db, "todos"),
+              where("userId", "==", user.uid)
+            );
+            const querySnapshot = await getDocs(q);
 
-        const q = query(
-          collection(db, "todos"),
-          where("userId", "==", userContextId)
-        );
-        const querySnapshot = await getDocs(q);
+            const todosData = querySnapshot.docs.map((doc) => ({
+              ...doc.data(),
+              id: doc.id,
+            })) as Todo[];
 
-        const todosData = querySnapshot.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-        })) as Todo[];
+            console.log("Fetched todos:", todosData);
+            setTodos(todosData);
+          } catch (error) {
+            console.error("Error fetching todos:", error);
+          } finally {
+            setLoading(false);
+          }
+        };
 
-        console.log("Fetched todos:", todosData);
-        setTodos(todosData);
-      } catch (error) {
-        console.error("Error fetching todos:", error);
-      } finally {
-        setLoading(false);
+        fetchTodos();
+      } else {
+        setTodos([]);
       }
-    };
+    });
 
-    fetchTodos();
-  }, [userContextId]);
+    return () => unsubscribeAuth();
+  }, []);
 
   const addTodo = async () => {
     if (formData.title.length > 3 && formData.description) {
@@ -168,31 +177,32 @@ const TaskManager: React.FC = () => {
       setfilteredTasks([]);
     }
   };
+  const handleShowAdd = () => {
+    setShowPopup(true);
+  };
 
   return (
-    <div className="w-full h-full relative font-sans bg-gray-300 p-1.5 ">
+    <div className="w-full min-h-screen flex flex-col flex-1 relative font-sans bg-gray-300 pb-20 pt-5">
       <div className="flex justify-center items-center gap-2 my-2  w-[90%] mx-auto">
         <SearchInput
           taskSearchInput={taskSearchInput}
           handleTaskSearch={handleTaskSearch}
         />
-        <button className="px-4 py-2 mb-3 bg-[#1a202c] text-white text-sm font-medium rounded-md cursor-pointer transition-colors duration-200 hover:bg-gray-700">
+        <button className="px-4 py-3 mb-4 bg-[#1a202c] text-white text-sm font-medium rounded-md cursor-pointer transition-colors duration-200 hover:bg-gray-700">
           <FaSearch />
         </button>
       </div>
 
       <button
-        onClick={() => setShowPopup(true)}
-        className="fixed bottom-8 right-8 w-12 h-12 flex items-center justify-center rounded-full bg-gray-900 text-white text-lg shadow-md hover:scale-105 transition-transform"
+        onClick={handleShowAdd}
+        className="fixed bottom-8 right-8 w-12 h-12 flex items-center justify-center rounded-full bg-gray-900 text-white text-lg shadow-md hover:scale-105 transition-transform cursor-pointer"
       >
         <FaPlus size={18} />
       </button>
 
-      <div>
+      <div className="w-[90%] mx-auto h-full  ">
         {loading ? (
-          <div className="fixed inset-0 flex justify-center items-center z-50">
-            <div className="w-12 h-12 border-4 border-[#1a202c] border-t-transparent rounded-full animate-spin"></div>
-          </div>
+          <Loader />
         ) : (
           <TodoList
             Todos={Todos}

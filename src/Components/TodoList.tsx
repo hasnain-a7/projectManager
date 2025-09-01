@@ -27,7 +27,7 @@ const TodoList: React.FC<TodoListProps> = ({
   deleteTodo,
 }) => {
   return (
-    <ul className="todo-list">
+    <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 h-[100%] w-[100%]">
       {searchInput !== "" ? (
         filteredList.length > 0 ? (
           filteredList.map((item) => (

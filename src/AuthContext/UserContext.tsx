@@ -1,4 +1,3 @@
-// src/AuthContext/UserContextId.tsx
 import { createContext, useState, useContext } from "react";
 
 type UserContextIdType = {

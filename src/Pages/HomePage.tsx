@@ -1,7 +1,7 @@
 import React from "react";
 import TaskManager from "../Components/TaskManager";
 
-const Home = () => {
+const HomePage = () => {
   return (
     <div className="home-page">
       <main className="main-content">
@@ -11,4 +11,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default HomePage;

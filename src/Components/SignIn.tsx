@@ -21,7 +21,7 @@ const SignIn: React.FC = () => {
       setUser(currentUser);
 
       if (currentUser && currentUser.email) {
-        navigate("/home");
+        navigate("/app");
       }
     });
 
