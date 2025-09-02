@@ -20,11 +20,15 @@ interface Todo {
   createdAt: string;
   todo: string;
   userId: string;
+  status: string;
+  categories?: string;
+  attechment?: string;
 }
 
 interface FormData {
   title: string;
   description: string;
+  status: string;
 }
 
 interface TodoContextType {
@@ -35,7 +39,8 @@ interface TodoContextType {
   showPopup: boolean;
   setShowPopup: React.Dispatch<React.SetStateAction<boolean>>;
   highlightedTask: string | null;
-  handleSubmit: () => void;
+  addTodo: (userId: string) => void;
+  updateTodo: () => void;
   deleteTodo: (id: string) => void;
   openEdit: (id: string) => void;
   handleTaskSearch: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -55,6 +60,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
   const [formData, setFormData] = useState<FormData>({
     title: "",
     description: "",
+    status: "backlog",
   });
   const [editId, setEditId] = useState<string | null>(null);
   const [showPopup, setShowPopup] = useState(false);
@@ -80,6 +86,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
               id: doc.id,
             })) as Todo[];
             setTodos(todosData);
+            console.log(todosData);
           } catch (err) {
             console.error("Error fetching todos:", err);
           } finally {
@@ -95,7 +102,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
     return () => unsubscribeAuth();
   }, []);
 
-  const addTodo = async () => {
+  const addTodo = async (userId: string) => {
     if (formData.title.length > 3 && formData.description) {
       setLoading(true);
       try {
@@ -104,10 +111,14 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
           todo: formData.description,
           completed: false,
           createdAt: new Date().toLocaleString(),
-          userId: userContextId ?? "",
+          userId: userId ?? "",
+          status: formData.status,
+          categories: "optional",
+          attechments: "/img.png",
         };
         const docRef = await addDoc(collection(db, "todos"), newTodo);
         setTodos([{ id: docRef.id, ...newTodo }, ...todos]);
+        console.log(todos);
         setHighlightedTask(docRef.id);
         setTimeout(() => setHighlightedTask(null), 3000);
         resetForm();
@@ -129,11 +140,17 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
         await updateDoc(todoRef, {
           title: formData.title,
           todo: formData.description,
+          status: formData.status,
         });
         setTodos(
           todos.map((t) =>
             t.id === editId
-              ? { ...t, title: formData.title, todo: formData.description }
+              ? {
+                  ...t,
+                  title: formData.title,
+                  todo: formData.description,
+                  status: formData.status,
+                }
               : t
           )
         );
@@ -144,11 +161,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
         setLoading(false);
       }
     }
-  };
-
-  const handleSubmit = () => {
-    if (editId === null) addTodo();
-    else updateTodo();
   };
 
   const deleteTodo = async (id: string) => {
@@ -166,14 +178,14 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
   const openEdit = (id: string) => {
     const t = todos.find((todo) => todo.id === id);
     if (t && t.userId === userContextId) {
-      setFormData({ title: t.title, description: t.todo });
+      setFormData({ title: t.title, description: t.todo, status: t.status });
       setEditId(id);
       setShowPopup(true);
     }
   };
 
   const resetForm = () => {
-    setFormData({ title: "", description: "" });
+    setFormData({ title: "", description: "", status: formData.status });
     setEditId(null);
     setShowPopup(false);
   };
@@ -194,7 +206,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const handleShowAdd = () => {
-    setFormData({ title: "", description: "" });
+    setFormData({ title: "", description: "", status: formData.status });
     setEditId(null);
     setShowPopup(true);
   };
@@ -209,7 +221,8 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
         showPopup,
         setShowPopup,
         highlightedTask,
-        handleSubmit,
+        addTodo,
+        updateTodo,
         deleteTodo,
         openEdit,
         handleTaskSearch,

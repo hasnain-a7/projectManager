@@ -1,16 +1,22 @@
 import React, { useState } from "react";
 import { useTaskContext } from "../TaskContext/TaskContext";
+import { useUserContextId } from "../AuthContext/UserContext";
+type userContext = {
+  userContextId: string | null;
+};
 
 const TodoModel: React.FC = () => {
   const {
     formData,
     setFormData,
-    handleSubmit,
+    addTodo,
+    updateTodo,
     showPopup,
     setShowPopup,
     editId,
     loading,
   } = useTaskContext();
+  const { userContextId }: userContext = useUserContextId();
   const [localLoading, setLocalLoading] = useState(false);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,6 +29,10 @@ const TodoModel: React.FC = () => {
     setFormData({ ...formData, description: e.target.value });
   };
 
+  const handleSubmit = () => {
+    if (editId === null) addTodo(userContextId ?? "");
+    else updateTodo();
+  };
   const handleSave = () => {
     setLocalLoading(true);
     handleSubmit();
@@ -30,8 +40,13 @@ const TodoModel: React.FC = () => {
   };
 
   const handleCancel = () => {
-    setFormData({ title: "", description: "" });
+    setFormData({ title: "", description: "", status: "backlog" });
     setShowPopup(false);
+  };
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setFormData({ ...formData, status: value });
+    console.log("Selected Status:", value);
   };
 
   if (!showPopup) return null;
@@ -58,6 +73,27 @@ const TodoModel: React.FC = () => {
           onChange={handleDescriptionChange}
           className="w-full p-2 border border-gray-300 rounded-lg mb-4"
         />
+        {editId !== null && (
+          <div className="flex flex-col w-full mb-4">
+            <label htmlFor="status" className="mb-1 font-semibold">
+              Status:
+            </label>
+            <select
+              id="status"
+              value={formData.status}
+              onChange={handleStatusChange}
+              className="border border-gray-300 rounded px-2 py-1"
+            >
+              <option value="">Select</option>
+              <option value="pending">Pending</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="completed">Completed</option>
+              <option value="backlog">Backlog</option>
+            </select>
+          </div>
+        )}
 
         <div className="flex justify-end gap-3">
           <button

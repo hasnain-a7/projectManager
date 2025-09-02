@@ -1,6 +1,6 @@
 import React from "react";
 import TodoSingleList from "./TodoSingleList";
-import { useTaskContext } from "../TaskContext/TaskContext"; // import your context hook
+import { useTaskContext } from "../TaskContext/TaskContext";
 
 interface TodoListProps {
   taskColor: string | null;
@@ -16,9 +16,9 @@ const TodoList: React.FC<TodoListProps> = ({ taskColor }) => {
           <TodoSingleList key={item.id} item={item} taskColor={taskColor} />
         ))
       ) : (
-        <li className="text-[#1a202c] font-medium flex justify-center items-center text-center w-full pt-20">
-          <p>Todo not found</p>
-        </li>
+        <p className="text-[#1a202c] font-medium flex text-center w-full pt-20 pl-36 ml-96">
+          Todo not found
+        </p>
       )}
     </ul>
   );

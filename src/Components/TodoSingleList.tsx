@@ -29,7 +29,7 @@ const TodoSingleList: React.FC<TodoSingleListProps> = ({ item, taskColor }) => {
             Description: {item.todo}
           </p>
         </div>
-        <p className="my-1 text-xs text-[#5e5e5e] flex-1 min-w-[100px] max-md:min-w-0 max-md:my-0.5">
+        <p className="my-1 text-xs text-[#5e5e5e] flex-1 min-w-[100px] max-md:min-w-0 max-md:my-0.5 font-medium">
           Time: {item.createdAt}
         </p>
 
