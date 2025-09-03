@@ -10,13 +10,13 @@ const TodoList: React.FC<TodoListProps> = ({ taskColor }) => {
   const { todos, filteredTasks, taskSearchInput } = useTaskContext();
   const listToRender = taskSearchInput !== "" ? filteredTasks : todos;
   return (
-    <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 h-[100%] w-[100%]">
+    <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 h-[100%] w-[100%]">
       {listToRender.length > 0 ? (
         listToRender.map((item) => (
           <TodoSingleList key={item.id} item={item} taskColor={taskColor} />
         ))
       ) : (
-        <p className="text-[#1a202c] font-medium flex text-center w-full pt-20 pl-36 ml-96">
+        <p className="text-white font-medium flex text-center w-full pt-20 pl-36 ml-96">
           Todo not found
         </p>
       )}

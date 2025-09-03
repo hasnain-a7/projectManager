@@ -17,15 +17,15 @@ const TaskManager: React.FC = () => {
   } = useTaskContext();
 
   return (
-    <div className="w-full min-h-screen flex flex-col flex-1 relative font-sans bg-gray-300 pb-20 pt-5">
+    <div
+      className="w-full min-h-screen flex flex-col flex-1 relative font-sans bg-gradient-to-b from-[#59448A] to-[#884C85] 
+ pb-20 pt-5"
+    >
       <div className="flex justify-center items-center gap-2 my-2 w-[90%] mx-auto">
         <SearchInput
           taskSearchInput={taskSearchInput}
           handleTaskSearch={handleTaskSearch}
         />
-        <button className="px-4 py-3 mb-4 bg-[#1a202c] text-white text-sm font-medium rounded-md cursor-pointer transition-colors duration-200 hover:bg-gray-700">
-          <FaSearch />
-        </button>
       </div>
 
       <button

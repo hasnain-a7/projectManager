@@ -1,20 +1,40 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTaskContext } from "../TaskContext/TaskContext";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { db } from "../Config/firbase";
 import { updateDoc, doc } from "firebase/firestore";
+import Loader from "../Components/Loader";
 
 const DashboardPage: React.FC = () => {
   const { todos } = useTaskContext();
 
-  const [tasks, setTasks] = useState(todos.filter((t) => !t.completed));
-  const [done, setDone] = useState(todos.filter((t) => t.completed));
-  const [status, setStatus] = useState<string[]>([]);
-  const handleTaskcompeletedFirebase = async (task: object) => {
-    const todoRef = doc(db, "todos", task.id);
-    await updateDoc(todoRef, { completed: true });
-  };
+  const [statusTasks, setStatusTasks] = useState<{ [key: string]: any[] }>({});
+  const [loading, setLoading] = useState(true);
 
+  const statuses = ["backlog", "pending", "active", "inactive", "completed"];
+
+  useEffect(() => {
+    if (todos.length === 0) {
+      setLoading(true);
+    } else {
+      const statusTasksObj: { [key: string]: any[] } = {};
+      statuses.forEach((status) => {
+        statusTasksObj[status] = todos.filter((todo) => todo.status === status);
+      });
+      setStatusTasks(statusTasksObj);
+      console.log(statusTasksObj);
+      setLoading(false);
+    }
+  }, [todos]);
+
+  const updateTaskInFirebase = async (taskId: string, newStatus: string) => {
+    try {
+      const todoRef = doc(db, "todos", taskId);
+      await updateDoc(todoRef, { status: newStatus });
+    } catch (error) {
+      console.error("Error updating task:", error);
+    }
+  };
   const handleDragEnd = (event) => {
     const { source, destination } = event;
 
@@ -25,109 +45,105 @@ const DashboardPage: React.FC = () => {
       source.index === destination.index
     )
       return;
-    if (source.droppableId === "tasks" && destination.droppableId === "done") {
-      const movedTask = tasks[source.index];
-      handleTaskcompeletedFirebase(movedTask);
-      const newTasks = tasks.filter((_, index) => index !== source.index);
-      setTasks(newTasks);
 
-      const newDone = [...done];
-      newDone.splice(destination.index, 0, { ...movedTask, completed: true });
-      setDone(newDone);
+    const sourceId = source.droppableId;
+    const destId = destination.droppableId;
+
+    const newStatusTasks = { ...statusTasks };
+    const movedTask = newStatusTasks[sourceId].splice(source.index, 1)[0];
+
+    if (sourceId !== destId) {
+      movedTask.status = destId;
+    }
+
+    newStatusTasks[destId].splice(destination.index, 0, movedTask);
+
+    setStatusTasks(newStatusTasks);
+
+    if (sourceId !== destId) {
+      updateTaskInFirebase(movedTask.id, destId);
     }
   };
-  const statuses = ["backlog", "pending", "active", "inactive", "cancelled"];
+
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="flex flex-wrap gap-6 p-6 pb-20  h-screen bg-[#D1D5DC]">
-        <Droppable droppableId="tasks">
-          {(provided) => (
-            <div
-              className="flex-1 bg-green-50 rounded-lg shadow-md p-5 border border-green-200"
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-            >
-              <h2 className="font-bold text-xl mb-4 text-green-700">Default</h2>
-              <div className="flex flex-col gap-3">
-                {tasks.map((item, index) => (
-                  <Draggable key={item.id} draggableId={item.id} index={index}>
-                    {(provided) => (
-                      <div
-                        className="p-4 flex justify-between bg-white rounded-xl shadow hover:shadow-lg transition cursor-pointer"
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                      >
-                        <div className="flex justify-between gap-2">
-                          <h3 className="text-md font-medium">Title:</h3>
-                          {item.title}
-                        </div>
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            </div>
-          )}
-        </Droppable>
+      <div className="flex gap-6 p-6 w-screen min-h-screen bg-gradient-to-b from-[#59448A] to-[#884C85]">
         {statuses.map((statusKey) => (
-          <div
-            key={statusKey}
-            className="bg-gray-100 rounded-lg p-4 min-w-[250px] flex flex-col"
-          >
-            <h2 className="font-bold text-lg mb-4 capitalize">{statusKey}</h2>
+          <Droppable droppableId={statusKey} type="TASK" key={statusKey}>
+            {(provided) => (
+              <div
+                className={`flex-none rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 p-3 hover:scale-[1.03]" min-w-[200px] max-w-[260px] max-h-min overflow-y-auto ${
+                  statusKey === "completed"
+                    ? "bg-[#101204] text-[#B6C2CF]"
+                    : "bg-[#101204] text-[#B6C2CF]"
+                }`}
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+              >
+                <h2
+                  className={`font-bold text-lg mb-4 capitalize ${
+                    statusKey === "completed"
+                      ? "text-green-700"
+                      : "text-[#B6C2CF]"
+                  }`}
+                >
+                  {statusKey}
+                </h2>
 
-            <div className="flex flex-col gap-3">
-              {todos
-                .filter((todo) => todo.status === statusKey)
-                .map((todo) => (
-                  <div
-                    key={todo.id}
-                    className="p-4 flex gap-3 bg-white rounded-xl shadow hover:shadow-lg transition cursor-pointer"
-                  >
-                    <h3 className="text-md font-medium">Title:</h3>
-                    {todo.title}
-                  </div>
-                ))}
-            </div>
-          </div>
-        ))}
-
-        <Droppable droppableId="done" direction="vertical">
-          {(provided) => (
-            <div
-              className="flex-1 bg-cyan-50 rounded-lg shadow-md p-5 border border-cyan-200"
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-            >
-              <h2 className="font-bold text-xl mb-4 text-cyan-700">
-                Done Tasks
-              </h2>
-              <div className="flex flex-col gap-3">
-                {done.map((item, index) => (
-                  <Draggable key={item.id} draggableId={item.id} index={index}>
-                    {(provided) => (
-                      <div
-                        className="p-4 flex justify-between bg-white rounded-xl shadow hover:shadow-lg transition cursor-pointer"
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
+                <div className="flex flex-col gap-3">
+                  {loading ? (
+                    <Loader />
+                  ) : (
+                    (statusTasks[statusKey] || []).map((todo, index) => (
+                      <Draggable
+                        key={todo.id}
+                        draggableId={todo.id}
+                        index={index}
                       >
-                        <div className="flex justify-between gap-2">
-                          <h3 className="text-md font-medium">Title:</h3>
+                        {(provided) => (
+                          <div
+                            className="p-3 flex flex-col gap-2 bg-[#2f383f] text-[#B6C2CF] 
+              rounded-lg shadow-sm hover:shadow-md transition cursor-pointer hover:border border-white"
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                          >
+                            <div className="flex flex-col gap-2">
+                              {todo.attechments &&
+                                todo.attechments.length > 0 && (
+                                  <img
+                                    src={todo.attechments[0]}
+                                    alt="todo-attachment"
+                                    className="w-full h-32 object-cover rounded-md"
+                                  />
+                                )}
 
-                          {item.title}
-                        </div>
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
+                              <span
+                                className={`text-sm ${
+                                  todo.status === "completed"
+                                    ? "line-through text-gray-500"
+                                    : "text-[#B6C2CF]"
+                                }`}
+                              >
+                                {todo.title}
+                              </span>
+
+                              {todo.todo && (
+                                <p className="text-xs text-[#9DAAB6] line-clamp-3">
+                                  {todo.todo}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))
+                  )}
+                </div>
               </div>
-            </div>
-          )}
-        </Droppable>
+            )}
+          </Droppable>
+        ))}
       </div>
     </DragDropContext>
   );

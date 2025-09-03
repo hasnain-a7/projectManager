@@ -22,13 +22,14 @@ interface Todo {
   userId: string;
   status: string;
   categories?: string;
-  attechment?: string;
+  attechments: string[];
 }
 
 interface FormData {
   title: string;
   description: string;
   status: string;
+  attachments: string[];
 }
 
 interface TodoContextType {
@@ -61,6 +62,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
     title: "",
     description: "",
     status: "backlog",
+    attachments: [],
   });
   const [editId, setEditId] = useState<string | null>(null);
   const [showPopup, setShowPopup] = useState(false);
@@ -114,7 +116,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
           userId: userId ?? "",
           status: formData.status,
           categories: "optional",
-          attechments: "/img.png",
+          attechments: formData.attachments,
         };
         const docRef = await addDoc(collection(db, "todos"), newTodo);
         setTodos([{ id: docRef.id, ...newTodo }, ...todos]);
@@ -178,14 +180,24 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
   const openEdit = (id: string) => {
     const t = todos.find((todo) => todo.id === id);
     if (t && t.userId === userContextId) {
-      setFormData({ title: t.title, description: t.todo, status: t.status });
+      setFormData({
+        title: t.title,
+        description: t.todo,
+        status: t.status,
+        attachments: t.attechments,
+      });
       setEditId(id);
       setShowPopup(true);
     }
   };
 
   const resetForm = () => {
-    setFormData({ title: "", description: "", status: formData.status });
+    setFormData({
+      title: "",
+      description: "",
+      status: formData.status,
+      attachments: [],
+    });
     setEditId(null);
     setShowPopup(false);
   };
@@ -206,7 +218,12 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const handleShowAdd = () => {
-    setFormData({ title: "", description: "", status: formData.status });
+    setFormData({
+      title: "",
+      description: "",
+      status: formData.status,
+      attachments: [],
+    });
     setEditId(null);
     setShowPopup(true);
   };
