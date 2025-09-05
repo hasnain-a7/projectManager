@@ -10,7 +10,7 @@ const TodoList: React.FC<TodoListProps> = ({ taskColor }) => {
   const { todos, filteredTasks, taskSearchInput } = useTaskContext();
   const listToRender = taskSearchInput !== "" ? filteredTasks : todos;
   return (
-    <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 h-[100%] w-[100%]">
+    <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 h-[100%] w-[100%]">
       {listToRender.length > 0 ? (
         listToRender.map((item) => (
           <TodoSingleList key={item.id} item={item} taskColor={taskColor} />

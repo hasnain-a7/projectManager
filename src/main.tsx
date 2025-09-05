@@ -25,8 +25,8 @@ const router = createBrowserRouter(
     <>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/" element={<Layout />}>
-        <Route index element={<TaskManager />} />
-        <Route path="/dashboard" element={<DashboarPage />} />
+        <Route index element={<DashboarPage />} />
+        <Route path="/dashboard" element={<TaskManager />} />
         <Route path="/add-task" element={<AddTaskPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/important" element={<ImportedTaskPage />} />

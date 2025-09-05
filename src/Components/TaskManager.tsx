@@ -2,7 +2,7 @@ import React from "react";
 import TodoList from "./TodoList";
 import TodoModel from "./TodoModel";
 import SearchInput from "./SearchInput";
-import { FaPlus, FaSearch } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import Loader from "./Loader";
 import { useTaskContext } from "../TaskContext/TaskContext";
 
@@ -30,7 +30,7 @@ const TaskManager: React.FC = () => {
 
       <button
         onClick={handleShowAdd}
-        className="fixed bottom-8 right-8 w-12 h-12 flex items-center justify-center rounded-full bg-gray-900 text-white text-lg shadow-md hover:scale-105 transition-transform cursor-pointer"
+        className="fixed bottom-8 right-8 w-12 h-12 flex items-center justify-center rounded-full bg-[#101204] text-white text-lg shadow-md hover:scale-105 transition-transform cursor-pointer"
       >
         <FaPlus size={18} />
       </button>

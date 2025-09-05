@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useTaskContext } from "../TaskContext/TaskContext";
 import { useUserContextId } from "../AuthContext/UserContext";
-
+import { IoCloudUploadOutline } from "react-icons/io5";
 type userContext = {
   userContextId: string | null;
 };
@@ -20,18 +20,6 @@ const TodoModel: React.FC = () => {
 
   const { userContextId }: userContext = useUserContextId();
   const [localLoading, setLocalLoading] = useState(false);
-  const images = [
-    "https://picsum.photos/id/101/400/300",
-    "https://picsum.photos/id/102/400/300",
-    "https://picsum.photos/id/103/400/300",
-    "https://picsum.photos/id/104/400/300",
-    "https://picsum.photos/id/105/400/300",
-    "https://picsum.photos/id/106/400/300",
-    "https://picsum.photos/id/107/400/300",
-    "https://picsum.photos/id/108/400/300",
-    "https://picsum.photos/id/109/400/300",
-    "https://picsum.photos/id/110/400/300",
-  ];
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, title: e.target.value });
@@ -69,11 +57,15 @@ const TodoModel: React.FC = () => {
     setFormData({ ...formData, status: value });
   };
 
-  const handleImageSelect = (img: string) => {
-    setFormData({
-      ...formData,
-      attachments: [img],
-    });
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setFormData({
+        ...formData,
+        attachments: [url],
+      });
+    }
   };
 
   if (!showPopup) return null;
@@ -123,28 +115,28 @@ const TodoModel: React.FC = () => {
         )}
 
         <div className="mb-4">
-          <h4 className="font-semibold mb-2">Select an Image:</h4>
-          <div className="grid grid-cols-5 gap-1">
-            {images.length === 0 ? (
-              <p className="col-span-5 text-center text-gray-400 py-4">
-                Loading images...
-              </p>
-            ) : (
-              images.map((img, idx) => (
-                <img
-                  key={idx}
-                  src={img}
-                  alt={`option-${idx}`}
-                  className={`w-16 h-16 rounded-lg object-cover cursor-pointer border-2 ${
-                    formData.attachments?.includes(img)
-                      ? "border-blue-500"
-                      : "border-transparent"
-                  }`}
-                  onClick={() => handleImageSelect(img)}
-                />
-              ))
-            )}
-          </div>
+          <label htmlFor="uploadInput">
+            <input
+              id="uploadInput"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+            <IoCloudUploadOutline size={28} className="cursor-pointer" />
+          </label>
+          {formData.attachments.length > 0 ? (
+            <div className="mt-3 ">
+              <p className="text-sm text-gray-400 mb-1">Selected Image:</p>
+              <img
+                src={formData.attachments[0]}
+                alt="Selected"
+                className="w-12 flex h-12 rounded-lg object-cover border-2 border-blue-500"
+              />
+            </div>
+          ) : (
+            <p> no Image Selected</p>
+          )}
         </div>
 
         <div className="flex justify-end gap-3">
