@@ -12,6 +12,7 @@ const DetailPage = () => {
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
             Task Information
           </h2>
+
           <p className="mb-2">
             <span className="font-medium">Title:</span> Example Task Title
           </p>
@@ -23,11 +24,11 @@ const DetailPage = () => {
             <span className="font-medium">Due Date:</span> 10th Sept, 2025
           </p>
           <p className="mb-2">
-            <span className="font-medium">Status:</span>{" "}
+            <span className="font-medium">Status:</span>
             <span className="text-yellow-600 font-semibold">Pending</span>
           </p>
           <p className="mb-2">
-            <span className="font-medium">Priority:</span>{" "}
+            <span className="font-medium">Priority:</span>
             <span className="text-red-600 font-semibold">High</span>
           </p>
           <p className="mb-2">

@@ -12,7 +12,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
     <>
       <input
         type="search"
-        className="w-[92%] h-10 p-3 mb-4 border-none text-gray-900 rounded-lg text-base bg-gray-50 outline-none placeholder:text-gray-800"
+        className="w-[92%] h-10 p-3 mb-4 border-none text-[#B6C2CF] rounded-lg text-base bg-[#1D2125] outline-none placeholder:text-[#B6C2CF]"
         placeholder=" Search Task here..."
         value={taskSearchInput}
         onChange={handleTaskSearch}

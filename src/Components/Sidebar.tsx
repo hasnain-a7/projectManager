@@ -2,9 +2,9 @@ import { NavLink } from "react-router-dom";
 import { IoMdHome } from "react-icons/io";
 import { MdDashboardCustomize } from "react-icons/md";
 import { IoMdAddCircle } from "react-icons/io";
-import { CgAdidas } from "react-icons/cg";
+
 import { CgAlignLeft } from "react-icons/cg";
-import { CgCalendarDue } from "react-icons/cg";
+
 import { auth } from "../Config/firbase";
 import { signOut } from "firebase/auth";
 import AccountDropdown from "../Components/NavBarAccount";
@@ -48,21 +48,11 @@ const Sidebar: React.FC = () => {
       path: "/important",
       icons: <CgAlignLeft />,
     },
-    {
-      name: "Gym Task",
-      path: "/completed",
-      icons: <CgAdidas />,
-    },
-    {
-      name: "Personal Task",
-      path: "/personal",
-      icons: <CgCalendarDue />,
-    },
   ];
 
   return (
     <aside
-      className={`fixed top-0 left-0 z-50 h-full  bg-[#1a202c] text-white transition-all duration-200 ease-in-out p-2 pt-4
+      className={`fixed top-0 left-0 z-50 h-full bg-gradient from-[#59448A] to-[#884C85] shadow-xl bg-transparent border-l-0 text-white transition-all duration-200 ease-in-out p-2 pt-4
         lg:relative lg: translate-x-0
         ${isSidebarOpen ? "w-48" : "w-16 "}
       `}
@@ -86,8 +76,8 @@ const Sidebar: React.FC = () => {
                     className={({ isActive }) =>
                       `flex items-center gap-3 p-2  rounded-lg text-sm font-semibold duration-200 transition-colors ${
                         isActive
-                          ? "bg-[#3CBEA9] text-white item"
-                          : "text-gray-200 hover:bg-gray-700 hover:text-white"
+                          ? "bg-[#DCDFE4] text-[#101204] item"
+                          : "text-gray-200 hover:bg-[#b5b8bd] hover:text-[#101204]"
                       }`
                     }
                   >

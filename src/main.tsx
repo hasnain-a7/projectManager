@@ -18,14 +18,15 @@ import DetailPage from "./Pages/DetailPage";
 import ImportedTaskPage from "./Pages/ImportedTaskPage";
 import CompeletedTaskPage from "./Pages/CompeletedTaskPage";
 import PersonalPage from "./Pages/PersonalPage";
+import { TaskProvider } from "./TaskContext/TaskContext";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/" element={<Layout />}>
-        <Route index element={<TaskManager />} />
-        <Route path="/dashboard" element={<DashboarPage />} />
+        <Route index element={<DashboarPage />} />
+        <Route path="/dashboard" element={<TaskManager />} />
         <Route path="/add-task" element={<AddTaskPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/important" element={<ImportedTaskPage />} />
@@ -40,6 +41,8 @@ const router = createBrowserRouter(
 const root = ReactDOM.createRoot(document.getElementById("root")!);
 root.render(
   <UserProvider>
-    <RouterProvider router={router} />
+    <TaskProvider>
+      <RouterProvider router={router} />
+    </TaskProvider>
   </UserProvider>
 );
