@@ -1,20 +1,39 @@
 import { Outlet } from "react-router-dom";
-import Sidebar from "../Components/Sidebar";
+import { AppSidebar } from "../components/app-sidebar";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "../components/ui/breadcrumb";
+import { Separator } from "../components/ui/separator";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "../components/ui/sidebar";
 
-const Layout: React.FC = () => {
+export default function Page() {
   return (
-    <div className="relative flex flex-col h-dvh w-full transition-all bg-gradient-to-b from-[#59448A] to-[#884C85]  ">
-      <div className="flex h-screen w-full overflow-hidden">
-        <Sidebar />
-
-        <div className="flex flex-col flex-1 min-w-0 h-screen overflow-hidden bg-gradient-to-b from-[#59448A] to-[#884C85]">
-          <main className="flex-1 max-h-full  overflow-y-auto">
-            <Outlet />
-          </main>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <header className="bg-zinc-100 flex h-10 shrink-0 items-center  gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-10">
+          <div className="flex items-center gap-2 px-4">
+            <SidebarTrigger className="" />
+            <Separator
+              orientation="vertical"
+              className=" data-[orientation=vertical]:h-4"
+            />
+            <Breadcrumb>Task Manger</Breadcrumb>
+          </div>
+        </header>
+        <div className="flex flex-1 flex-col gap-1 p-2  bg-zinc-100">
+          <Outlet />
         </div>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
-};
-
-export default Layout;
+}

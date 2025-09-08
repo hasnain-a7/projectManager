@@ -18,10 +18,10 @@ const TaskManager: React.FC = () => {
 
   return (
     <div
-      className="w-full min-h-screen flex flex-col flex-1 relative font-sans bg-gradient-to-b from-[#59448A] to-[#884C85] 
+      className="w-full min-h-screen flex flex-col flex-1 relative font-sans 
  pb-20 pt-5"
     >
-      <div className="flex justify-center items-center gap-2 my-2 w-[90%] mx-auto">
+      <div className="flex justify-center items-center gap-2 w-[90%] mx-auto">
         <SearchInput
           taskSearchInput={taskSearchInput}
           handleTaskSearch={handleTaskSearch}
