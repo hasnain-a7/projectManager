@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./App.css";
 import LoginPage from "./Pages/LoginPage";
-import TaskManager from "./Components/TaskManager";
+import TaskManager from "./components/TaskManager";
 import {
   createRoutesFromElements,
   createBrowserRouter,
@@ -19,6 +19,7 @@ import ImportedTaskPage from "./Pages/ImportedTaskPage";
 import CompeletedTaskPage from "./Pages/CompeletedTaskPage";
 import PersonalPage from "./Pages/PersonalPage";
 import { TaskProvider } from "./TaskContext/TaskContext";
+import ProjectPage from "./Pages/ProjectPage";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -33,6 +34,7 @@ const router = createBrowserRouter(
         <Route path="/completed" element={<CompeletedTaskPage />} />
         <Route path="/personal" element={<PersonalPage />} />
         <Route path="/task/detail" element={<DetailPage />} />
+        <Route path="/projects/:projectId" element={<ProjectPage />} />
       </Route>
     </>
   )

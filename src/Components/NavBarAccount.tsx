@@ -1,28 +1,52 @@
-import { useRef } from "react";
+"use client";
+
+import { useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "../Config/firbase";
 import { FaUser, FaSignOutAlt } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-const AccountDropdown = ({ onLogout }: { onLogout: () => void }) => {
+export function SidebarAccount() {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate("/login");
+    } catch (error: any) {
+      console.error("Logout error:", error.message);
+    }
+  };
+
   return (
-    <div className="relative">
-      <ul className=" text-sm">
-        <li>
-          <Link to="/profile" className="flex items-center w-full px-4 py-2 ">
-            <FaUser size={18} />
-          </Link>
-        </li>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Avatar className="cursor-pointer">
+          <AvatarImage src="/avatar.png" alt="User" />
+          <AvatarFallback>U</AvatarFallback>
+        </Avatar>
+      </DropdownMenuTrigger>
 
-        <li>
-          <button
-            onClick={onLogout}
-            className="flex items-center w-full px-4 py-2 cursor-pointer"
-          >
-            <FaSignOutAlt size={18} />
-          </button>
-        </li>
-      </ul>
-    </div>
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem asChild>
+          <a href="/profile" className="flex items-center gap-2">
+            <FaUser /> Profile
+          </a>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem
+          onClick={handleLogout}
+          className="flex items-center gap-2"
+        >
+          <FaSignOutAlt /> Logout
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
-};
-
-export default AccountDropdown;
+}

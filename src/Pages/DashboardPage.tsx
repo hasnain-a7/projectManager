@@ -66,7 +66,7 @@ const DashboardPage: React.FC = () => {
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="flex gap-2 p-4 w-screen min-h-screen relative bg-gradient-to-b from-[#59448A] to-[#884C85] overflow-y-auto scrollbar-thin">
+      <div className="flex gap-2 p-4 w-screen min-h-screen relative  overflow-y-auto scrollbar-thin">
         {statuses.map((statusKey) => (
           <Droppable droppableId={statusKey} type="TASK" key={statusKey}>
             {(provided) => (
