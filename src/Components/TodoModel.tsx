@@ -2,20 +2,29 @@ import React, { useState } from "react";
 import { useTaskContext } from "../TaskContext/TaskContext";
 import { useUserContextId } from "../AuthContext/UserContext";
 import { IoCloudUploadOutline } from "react-icons/io5";
+
 type userContext = {
   userContextId: string | null;
 };
 
-const TodoModel: React.FC = () => {
+interface TodoModelProps {
+  projectId: string;
+  updateProjectTask: any;
+}
+
+const TodoModel: React.FC<TodoModelProps> = ({
+  projectId,
+  updateProjectTask,
+}) => {
   const {
     formData,
     setFormData,
-    addTodo,
-    updateTodo,
+
     showPopup,
     setShowPopup,
     editId,
     loading,
+    addTaskToProjectByTitle,
   } = useTaskContext();
 
   const { userContextId }: userContext = useUserContextId();
@@ -31,15 +40,36 @@ const TodoModel: React.FC = () => {
     setFormData({ ...formData, description: e.target.value });
   };
 
-  const handleSubmit = () => {
-    if (editId === null) addTodo(userContextId ?? "");
-    else updateTodo();
-  };
+  const handleSubmit = async () => {
+    if (!formData.title) return;
 
-  const handleSave = () => {
     setLocalLoading(true);
-    handleSubmit();
-    setLocalLoading(false);
+
+    try {
+      if (editId === null) {
+        await addTaskToProjectByTitle(projectId, userContextId ?? "", {
+          title: formData.title,
+          description: formData.description,
+          status: formData.status,
+          attachments: formData.attachments,
+        });
+      } else {
+        updateProjectTask();
+      }
+
+      // Clear form after adding/updating
+      setFormData({
+        title: "",
+        description: "",
+        status: "backlog",
+        attachments: [],
+      });
+      setShowPopup(false);
+    } catch (err) {
+      console.error("Error adding/updating task:", err);
+    } finally {
+      setLocalLoading(false);
+    }
   };
 
   const handleCancel = () => {
@@ -53,8 +83,7 @@ const TodoModel: React.FC = () => {
   };
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    setFormData({ ...formData, status: value });
+    setFormData({ ...formData, status: e.target.value });
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,6 +121,7 @@ const TodoModel: React.FC = () => {
           onChange={handleDescriptionChange}
           className="w-full p-2 border border-gray-300 rounded-lg mb-4"
         />
+
         {editId !== null && (
           <div className="flex flex-col w-full mb-4">
             <label htmlFor="status" className="mb-1 font-semibold">
@@ -131,17 +161,17 @@ const TodoModel: React.FC = () => {
               <img
                 src={formData.attachments[0]}
                 alt="Selected"
-                className="w-12 flex h-12 rounded-lg object-cover border-2 border-blue-500"
+                className="w-12 h-12 rounded-lg object-cover border-2 border-blue-500"
               />
             </div>
           ) : (
-            <p> no Image Selected</p>
+            <p>No Image Selected</p>
           )}
         </div>
 
         <div className="flex justify-end gap-3">
           <button
-            onClick={handleSave}
+            onClick={handleSubmit}
             disabled={localLoading || loading}
             className="px-4 py-2 bg-gradient-to-r from-[#00AECC] to-[#5AC4D4] text-black rounded-lg cursor-pointer disabled:opacity-50"
           >

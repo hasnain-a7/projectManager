@@ -31,6 +31,13 @@ interface FormData {
   status: string;
   attachments: string[];
 }
+interface Project {
+  id?: string;
+  title: string;
+  url?: string;
+  userId?: string;
+  createdAt?: string;
+}
 
 interface TodoContextType {
   todos: Todo[];
@@ -47,9 +54,22 @@ interface TodoContextType {
   handleTaskSearch: (e: React.ChangeEvent<HTMLInputElement>) => void;
   taskSearchInput: string;
   filteredTasks: Todo[];
+  addTaskToProjectByTitle: (
+    projectTitle: string,
+    userId: string,
+    formData: {
+      title: string;
+      description: string;
+      status: string;
+      attachments?: string[];
+    }
+  ) => Promise<string>;
+  setEditId: (id: string | null) => void;
   handleShowAdd: () => void;
   editId: string | null;
   resetForm: () => void;
+  projects: Project[];
+  setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
 }
 
 const TaskContext = createContext<TodoContextType | undefined>(undefined);
@@ -70,6 +90,8 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
   const [filteredTasks, setFilteredTasks] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(false);
   const [highlightedTask, setHighlightedTask] = useState<string | null>(null);
+  const [projects, setProjects] = React.useState<Project[]>([]);
+
   const { userContextId } = useUserContextId();
 
   useEffect(() => {
@@ -131,6 +153,55 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     } else {
       alert("Please enter a valid title and description.");
+    }
+  };
+
+  const addTaskToProjectByTitle = async (
+    projectTitle: string,
+    userId: string,
+    formData: {
+      title: string;
+      description: string;
+      status: string;
+      attachments?: string[];
+    }
+  ) => {
+    try {
+      const q = query(
+        collection(db, "Projects"),
+        where("title", "==", projectTitle),
+        where("userId", "==", userId)
+      );
+
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        throw new Error(`Project "${projectTitle}" not found for this user`);
+      }
+
+      const projectDoc = querySnapshot.docs[0];
+      const projectId = projectDoc.id;
+
+      const newTask = {
+        title: formData.title,
+        todo: formData.description,
+        completed: false,
+        createdAt: new Date().toLocaleString(),
+        status: formData.status,
+        attachments: formData.attachments || [],
+        userId: userContextId,
+      };
+
+      const taskRef = await addDoc(
+        collection(db, "Projects", projectId, "tasks"),
+        newTask
+      );
+
+      console.log(`✅ Task added to project "${projectTitle}":`, taskRef.id);
+      return taskRef.id;
+    } catch (err) {
+      console.error("❌ Error adding task:", err);
+      throw err;
     }
   };
 
@@ -248,6 +319,10 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
         handleShowAdd,
         editId,
         resetForm,
+        projects,
+        setProjects,
+        addTaskToProjectByTitle,
+        setEditId,
       }}
     >
       {children}

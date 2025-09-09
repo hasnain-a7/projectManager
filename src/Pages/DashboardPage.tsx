@@ -5,7 +5,7 @@ import { db } from "../Config/firbase";
 import { updateDoc, doc } from "firebase/firestore";
 
 import { FaPlus } from "react-icons/fa";
-import TodoModel from "../Components/TodoModel";
+import TodoModel from "../components/TodoModel";
 
 const DashboardPage: React.FC = () => {
   const { todos, handleShowAdd, showPopup } = useTaskContext();

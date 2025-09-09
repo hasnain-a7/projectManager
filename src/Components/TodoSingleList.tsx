@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useTaskContext } from "../TaskContext/TaskContext";
+
 import { FaRegEdit } from "react-icons/fa";
 import { MdOutlineDelete } from "react-icons/md";
 import TaskDetailModal from "./TrelloDetailPage";
@@ -23,10 +23,19 @@ interface TodoSingleListProps {
     completed: boolean;
   };
   taskColor?: string | null;
+  projectid: string;
+  deleteProjectTask: (projectId: string, taskId: string) => Promise<void>;
+  updateProjectTask: any;
+  openEdit: (id: string) => void;
 }
 
-const TodoSingleList: React.FC<TodoSingleListProps> = ({ item }) => {
-  const { openEdit, deleteTodo } = useTaskContext();
+const TodoSingleList: React.FC<TodoSingleListProps> = ({
+  item,
+  projectid,
+  deleteProjectTask,
+
+  openEdit,
+}) => {
   const [showDetail, setShowDetail] = useState(false);
 
   return (
@@ -64,7 +73,7 @@ const TodoSingleList: React.FC<TodoSingleListProps> = ({ item }) => {
               <Button
                 size="sm"
                 variant="destructive"
-                onClick={() => deleteTodo(item.id)}
+                onClick={() => deleteProjectTask(projectid, item.id)}
               >
                 <MdOutlineDelete size={14} />
               </Button>

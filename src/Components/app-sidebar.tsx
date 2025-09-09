@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { NavLink } from "react-router-dom";
 import { IoMdHome } from "react-icons/io";
@@ -10,7 +8,17 @@ import { AiOutlinePlus, AiOutlineDelete } from "react-icons/ai";
 import { Separator } from "../components/ui/separator";
 import { auth } from "../Config/firbase";
 import { signOut } from "firebase/auth";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { db } from "../Config/firbase";
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 
 import {
   Sidebar,
@@ -25,7 +33,7 @@ import {
   SidebarRail,
   SidebarInput,
 } from "@/components/ui/sidebar";
-
+import { useTaskContext } from "@/TaskContext/TaskContext";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -34,10 +42,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { FaUser, FaSignOutAlt } from "react-icons/fa";
+import { useUserContextId } from "@/AuthContext/UserContext";
 
-// ---------------- DATA ----------------
 const items = [
-  { title: "Home", url: "/", icon: IoMdHome },
   { title: "Dashboard", url: "/dashboard", icon: MdDashboardCustomize },
   { title: "Add Task", url: "/add-task", icon: IoMdAddCircle },
   { title: "Student Task", url: "/important", icon: CgAlignLeft },
@@ -45,13 +52,11 @@ const items = [
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();
-  const [projects, setProjects] = React.useState([
-    { title: "Project A", url: "/projects/a" },
-    { title: "Project B", url: "/projects/b" },
-  ]);
-  console.log(projects);
+
   const [showInput, setShowInput] = React.useState(false);
   const [newProject, setNewProject] = React.useState("");
+  const { userContextId } = useUserContextId();
+  const { projects, setProjects } = useTaskContext();
 
   const handleLogout = async () => {
     try {
@@ -61,17 +66,87 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       console.error("Logout error:", error.message);
     }
   };
+  const addProject = async () => {
+    try {
+      const projectData = {
+        title: newProject,
+        userId: userContextId,
+        url: `/projects/${newProject.toLowerCase()}`,
+        createdAt: serverTimestamp(),
+      };
 
-  const addProject = () => {
-    if (!newProject.trim()) return;
-    const urlSafe = `/projects/${newProject
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, "-")}`;
-    setProjects([...projects, { title: newProject.trim(), url: urlSafe }]);
-    setNewProject("");
-    setShowInput(false);
+      const docRef = await addDoc(collection(db, "Projects"), projectData);
+      setProjects([
+        ...projects,
+        {
+          title: newProject,
+          url: `/projects/${newProject.toLowerCase()}`,
+        },
+      ]);
+      console.log(projectData);
+      setNewProject("");
+      setShowInput(false);
+      console.log("Project created with ID:", docRef.id);
+      return docRef.id;
+    } catch (err) {
+      console.error("Error creating project:", err);
+    }
   };
+  const fetchUserProjects = async () => {
+    try {
+      const q = query(
+        collection(db, "Projects"),
+        where("userId", "==", userContextId)
+      );
+
+      const querySnapshot = await getDocs(q);
+
+      const projects = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        title: doc.data().title,
+        url: doc.data().url,
+        userId: doc.data().userId,
+        createdAt: doc.data().createdAt,
+      }));
+      setProjects(projects);
+      console.log("✅ User projects:", projects);
+      return projects;
+    } catch (err) {
+      console.error("❌ Error fetching projects:", err);
+      return [];
+    }
+  };
+  useEffect(() => {
+    fetchUserProjects();
+  }, []);
+
+  // const addProject = async () => {
+  //   if (!newProject.trim()) return;
+
+  //   const projectTitle = newProject.trim();
+  //   const urlSafe = `/projects/${projectTitle
+  //     .toLowerCase()
+  //     .replace(/\s+/g, "-")}`;
+
+  //   const newProjectData = {
+  //     title: projectTitle,
+  //     url: urlSafe,
+  //     createdAt: serverTimestamp(),
+  //   };
+
+  //   try {
+  //     await addDoc(collection(db, "categories"), newProjectData);
+
+  //     setProjects([...projects, newProjectData]);
+
+  //     setNewProject("");
+  //     setShowInput(false);
+
+  //     console.log("Project added:", newProjectData);
+  //   } catch (error) {
+  //     console.error("Error adding project:", error);
+  //   }
+  // };
 
   const deleteProject = (title: string) => {
     setProjects(projects.filter((p) => p.title !== title));
@@ -87,7 +162,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title} className="text-4xl ">
-                  <NavLink to={item.url}>
+                  <NavLink to={item.title}>
                     {({ isActive }) => (
                       <SidebarMenuButton
                         tooltip={item.title}
@@ -143,29 +218,37 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             )}
 
             <SidebarMenu>
-              {projects.map((project) => (
-                <SidebarMenuItem
-                  key={project.title}
-                  className="flex items-center justify-between"
-                >
-                  <NavLink to={project.url}>
-                    {({ isActive }) => (
-                      <SidebarMenuButton
-                        tooltip={project.title}
-                        isActive={isActive}
-                      >
-                        <span className="cursor-pointer">{project.title}</span>
-                      </SidebarMenuButton>
-                    )}
-                  </NavLink>
-                  <button
-                    onClick={() => deleteProject(project.title)}
-                    className="p-1 rounded hover:bg-red-500 hover:text-white ml-1 cursor-pointer"
+              {projects.length > 0 ? (
+                projects.map((project: any) => (
+                  <SidebarMenuItem
+                    key={project.title}
+                    className="flex items-center justify-between"
                   >
-                    <AiOutlineDelete size={16} />
-                  </button>
-                </SidebarMenuItem>
-              ))}
+                    <NavLink to={project.url}>
+                      {({ isActive }) => (
+                        <SidebarMenuButton
+                          tooltip={project.title}
+                          isActive={isActive}
+                        >
+                          <span className="cursor-pointer">
+                            {project.title}
+                          </span>
+                        </SidebarMenuButton>
+                      )}
+                    </NavLink>
+                    <button
+                      onClick={() => deleteProject(project.title)}
+                      className="p-1 rounded hover:bg-red-500 hover:text-white ml-1 cursor-pointer"
+                    >
+                      <AiOutlineDelete size={16} />
+                    </button>
+                  </SidebarMenuItem>
+                ))
+              ) : (
+                <p className="text-sm text-gray-400 p-2">
+                  No projects yet. Add one!
+                </p>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
