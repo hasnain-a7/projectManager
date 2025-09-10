@@ -1,14 +1,15 @@
 "use client";
-
+import TaskAccordionTable from "@/components/TaskAccordionTable ";
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import TodoModel from "@/components/TodoModel";
 import TodoSingleList from "@/components/TodoSingleList";
 import { FaPlus } from "react-icons/fa";
-import { Input } from "@/components/ui/input";
+
 import { useTaskContext } from "../TaskContext/TaskContext";
 import { useUserContextId } from "@/AuthContext/UserContext";
 import { db } from "../Config/firbase";
+
 import {
   collection,
   query,
@@ -17,6 +18,7 @@ import {
   deleteDoc,
   doc,
   updateDoc,
+  addDoc,
 } from "firebase/firestore";
 
 interface Todo {
@@ -30,6 +32,7 @@ interface Todo {
   status: string;
   categories?: string;
   attechments: string[];
+  dueDate: string;
 }
 
 const ProjectPage: React.FC = () => {
@@ -43,39 +46,40 @@ const ProjectPage: React.FC = () => {
     setFormData,
     setEditId,
     setShowPopup,
+    taskCache,
+    setTaskCache,
   } = useTaskContext();
 
   const [newTaskTitle, setNewTaskTitle] = useState("");
-  const [specificTask, setSpecificTask] = useState<Todo[]>([]);
   const [currentTask, setCurrentTask] = useState<Todo | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  // ✅ Cache: { projectDocId: { title: string, tasks: Todo[] } }
 
-  // Fetch tasks for a project
-  const fetchProjectTasksForUser = async (
-    projectTitle: string,
-    userId: string
-  ): Promise<Todo[]> => {
-    try {
-      if (!userId) throw new Error("User ID is required");
+  // -------------------------------
+  // Fetch ALL projects + tasks once
+  // -------------------------------
+  const fetchAllProjectsAndTasks = async (userId: string) => {
+    const projectQuery = query(
+      collection(db, "Projects"),
+      where("userId", "==", userId)
+    );
+    const projectSnapshot = await getDocs(projectQuery);
 
-      const projectQuery = query(
-        collection(db, "Projects"),
-        where("title", "==", projectTitle),
-        where("userId", "==", userId)
-      );
-      const projectSnapshot = await getDocs(projectQuery);
+    const cacheData: {
+      [key: string]: { title: string; tasks: Todo[] };
+    } = {};
 
-      if (projectSnapshot.empty) return [];
-
-      const projectDoc = projectSnapshot.docs[0];
+    for (const projectDoc of projectSnapshot.docs) {
       const projectDocId = projectDoc.id;
+      const projectTitle = projectDoc.data().title;
 
       const tasksSnapshot = await getDocs(
         collection(db, "Projects", projectDocId, "tasks")
       );
 
-      return tasksSnapshot.docs.map((doc) => ({
+      const tasks = tasksSnapshot.docs.map((doc) => ({
         id: doc.id,
         projectId: projectDocId,
         title: doc.data().title || "",
@@ -87,38 +91,97 @@ const ProjectPage: React.FC = () => {
         categories: doc.data().categories || "",
         attechments: doc.data().attechments || [],
       }));
+
+      cacheData[projectDocId] = { title: projectTitle, tasks };
+    }
+
+    return cacheData;
+  };
+
+  // -------------------------------
+  // Add task
+  // -------------------------------
+  const addNewTask = async (
+    projectDocId: string,
+    taskData?: {
+      title: string;
+      todo?: string;
+      completed?: boolean;
+      status?: string;
+      attechments?: string[];
+    }
+  ) => {
+    if ((!taskData?.title && !newTaskTitle) || !userContextId) return;
+
+    const newTask = {
+      title: taskData?.title || newTaskTitle,
+      todo: taskData?.todo || "",
+      completed: taskData?.completed ?? false,
+      createdAt: new Date().toLocaleString(),
+      userId: userContextId,
+      status: taskData?.status || "pending",
+      attechments: taskData?.attechments || [],
+      dueDate: formData.dueDate,
+    };
+
+    try {
+      const taskRef = await addDoc(
+        collection(db, "Projects", projectDocId, "tasks"),
+        newTask
+      );
+
+      const taskWithId = {
+        ...newTask,
+        id: taskRef.id,
+        projectId: projectDocId,
+      };
+
+      // ✅ update cache only
+      setTaskCache((prev) => ({
+        ...prev,
+        [projectDocId]: {
+          ...prev[projectDocId],
+          tasks: [...(prev[projectDocId]?.tasks || []), taskWithId],
+        },
+      }));
+
+      setNewTaskTitle("");
     } catch (err) {
-      console.error("Error fetching project tasks:", err);
-      return [];
+      console.error("❌ Error adding task:", err);
     }
   };
 
+  // -------------------------------
   // Delete task
+  // -------------------------------
   const deleteProjectTask = async (projectId: string, taskId: string) => {
-    if (!userContextId) return;
     if (!window.confirm("Delete this task?")) return;
-
-    setLoading(true);
     try {
       await deleteDoc(doc(db, "Projects", projectId, "tasks", taskId));
-      setSpecificTask((prev) => prev.filter((t) => t.id !== taskId));
-      console.log("✅ Task deleted:", taskId);
+      setTaskCache((prev) => ({
+        ...prev,
+        [projectId]: {
+          ...prev[projectId],
+          tasks: prev[projectId].tasks.filter((t) => t.id !== taskId),
+        },
+      }));
     } catch (err) {
       console.error("❌ Error deleting project task:", err);
-    } finally {
-      setLoading(false);
     }
   };
 
+  // -------------------------------
   // Open edit modal
-  const openEdit = (id: string) => {
-    const t = specificTask.find((task) => task.id === id);
+  // -------------------------------
+  const openEdit = (id: string, projectDocId: string) => {
+    const t = taskCache[projectDocId]?.tasks.find((task) => task.id === id);
     if (t && t.userId === userContextId) {
       setFormData({
         title: t.title,
         description: t.todo,
         status: t.status,
         attachments: t.attechments,
+        dueDate: formData.dueDate,
       });
       setEditId(id);
       setCurrentTask(t);
@@ -132,15 +195,18 @@ const ProjectPage: React.FC = () => {
       description: "",
       status: "backlog",
       attachments: [],
+      dueDate: formData.dueDate,
     });
     setEditId(null);
     setCurrentTask(null);
     setShowPopup(false);
   };
 
+  // -------------------------------
+  // Update task
+  // -------------------------------
   const updateProjectTask = async () => {
-    if (editId && currentTask?.projectId && userContextId) {
-      setLoading(true);
+    if (editId && currentTask?.projectId) {
       try {
         const taskRef = doc(
           db,
@@ -155,59 +221,74 @@ const ProjectPage: React.FC = () => {
           status: formData.status,
         });
 
-        setSpecificTask((prev) =>
-          prev.map((t) =>
-            t.id === editId
-              ? {
-                  ...t,
-                  title: formData.title,
-                  todo: formData.description,
-                  status: formData.status,
-                }
-              : t
-          )
-        );
+        // ✅ update cache
+        setTaskCache((prev) => ({
+          ...prev,
+          [currentTask.projectId]: {
+            ...prev[currentTask.projectId],
+            tasks: prev[currentTask.projectId].tasks.map((t) =>
+              t.id === editId
+                ? {
+                    ...t,
+                    title: formData.title,
+                    todo: formData.description,
+                    status: formData.status,
+                  }
+                : t
+            ),
+          },
+        }));
 
         resetForm();
-        console.log("✅ Task updated:", editId);
       } catch (err) {
         console.error("❌ Error updating project task:", err);
-      } finally {
-        setLoading(false);
       }
     }
   };
 
+  // -------------------------------
+  // Load all projects once
+  // -------------------------------
   useEffect(() => {
-    if (!projectId || !userContextId) return;
+    if (!userContextId) return;
 
-    const fetchTasks = async () => {
+    const loadAll = async () => {
+      if (Object.keys(taskCache).length > 0) return; // already cached
       setLoading(true);
-      setError(null);
       try {
-        const tasks = await fetchProjectTasksForUser(projectId, userContextId);
-        setSpecificTask(tasks);
+        const cacheData = await fetchAllProjectsAndTasks(userContextId);
+        setTaskCache(cacheData);
       } catch (err) {
-        console.error(err);
-        setError("Failed to load tasks");
+        setError("Failed to load projects");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTasks();
-  }, [projectId, userContextId]);
+    loadAll();
+  }, [userContextId]);
+  console.log("task cache", taskCache);
+
+  const projectDocId = Object.keys(taskCache).find(
+    (id) => taskCache[id].title === projectId
+  );
+
+  const specificTask =
+    projectDocId && taskCache[projectDocId]
+      ? taskCache[projectDocId].tasks
+      : [];
 
   return (
     <div className="p-2 space-y-2">
-      <h1 className="text-2xl font-bold">Project: {projectId}</h1>
-
-      <div className="flex gap-2">
-        <Input
-          placeholder="New task title..."
-          value={newTaskTitle}
-          onChange={(e) => setNewTaskTitle(e.target.value)}
-        />
+      <div className="flex justify-end w-full">
+        {!loading && (
+          <button
+            className="px-2 py-1 border rounded-md bg-[#22272B] text-gray-300 hover:bg-gray-800 transition-colors"
+            onClick={() => navigate("/")}
+          >
+            View Trello
+          </button>
+        )}
       </div>
 
       <button
@@ -218,31 +299,17 @@ const ProjectPage: React.FC = () => {
       </button>
 
       {loading ? (
-        <div className="flex justify-center items-center mt-10 text-black">
-          Loading tasks...
+        <div className="flex justify-center items-center p-8 pt-52">
+          <span className="text-gray-600 text-lg">Loading tasks...</span>
         </div>
-      ) : error ? (
-        <div className="text-red-500 mt-10">{error}</div>
-      ) : specificTask.length === 0 ? (
-        <div className="mt-10 text-gray-500">No tasks found.</div>
       ) : (
-        <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {specificTask.map((task) => (
-            <TodoSingleList
-              key={task.id}
-              item={task}
-              projectid={task.projectId}
-              deleteProjectTask={deleteProjectTask}
-              updateProjectTask={updateProjectTask}
-              openEdit={openEdit}
-            />
-          ))}
-        </ul>
+        <TaskAccordionTable tasks={specificTask} />
       )}
-
-      {showPopup && (
+      {/* Edit Modal */}
+      {showPopup && projectDocId && (
         <TodoModel
-          projectId={projectId!}
+          projectId={projectDocId}
+          addNewTask={addNewTask}
           updateProjectTask={updateProjectTask}
         />
       )}

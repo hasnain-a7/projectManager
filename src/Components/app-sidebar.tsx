@@ -8,7 +8,7 @@ import { AiOutlinePlus, AiOutlineDelete } from "react-icons/ai";
 import { Separator } from "../components/ui/separator";
 import { auth } from "../Config/firbase";
 import { signOut } from "firebase/auth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "../Config/firbase";
 import {
@@ -46,13 +46,11 @@ import { useUserContextId } from "@/AuthContext/UserContext";
 
 const items = [
   { title: "Dashboard", url: "/dashboard", icon: MdDashboardCustomize },
-  { title: "Add Task", url: "/add-task", icon: IoMdAddCircle },
-  { title: "Student Task", url: "/important", icon: CgAlignLeft },
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();
-
+  const [isSidebarCollapsed, setisSidebarCollapsed] = useState<boolean>(false);
   const [showInput, setShowInput] = React.useState(false);
   const [newProject, setNewProject] = React.useState("");
   const { userContextId } = useUserContextId();
@@ -117,9 +115,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
   };
   useEffect(() => {
-    fetchUserProjects();
-  }, []);
-
+    if (userContextId) {
+      fetchUserProjects();
+    }
+  }, [userContextId]);
   // const addProject = async () => {
   //   if (!newProject.trim()) return;
 
@@ -224,24 +223,31 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     key={project.title}
                     className="flex items-center justify-between"
                   >
-                    <NavLink to={project.url}>
+                    <NavLink to={project.url} className="flex-1">
                       {({ isActive }) => (
                         <SidebarMenuButton
                           tooltip={project.title}
                           isActive={isActive}
+                          className="w-full text-left"
                         >
                           <span className="cursor-pointer">
-                            {project.title}
+                            {isSidebarCollapsed
+                              ? project.title[0] + project.title.slice(-1)
+                              : project.title}
                           </span>
                         </SidebarMenuButton>
                       )}
                     </NavLink>
-                    <button
-                      onClick={() => deleteProject(project.title)}
-                      className="p-1 rounded hover:bg-red-500 hover:text-white ml-1 cursor-pointer"
-                    >
-                      <AiOutlineDelete size={16} />
-                    </button>
+
+                    {/* Delete button hidden when collapsed */}
+                    {!isSidebarCollapsed && (
+                      <button
+                        onClick={() => deleteProject(project.title)}
+                        className="p-1 rounded hover:bg-red-500 hover:text-white ml-1 cursor-pointer"
+                      >
+                        <AiOutlineDelete size={16} />
+                      </button>
+                    )}
                   </SidebarMenuItem>
                 ))
               ) : (

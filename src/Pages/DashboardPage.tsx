@@ -8,7 +8,7 @@ import { FaPlus } from "react-icons/fa";
 import TodoModel from "../components/TodoModel";
 
 const DashboardPage: React.FC = () => {
-  const { todos, handleShowAdd, showPopup } = useTaskContext();
+  const { taskCache, handleShowAdd, showPopup } = useTaskContext();
 
   const [statusTasks, setStatusTasks] = useState<{ [key: string]: any[] }>({});
   const [loading, setLoading] = useState(true);
@@ -16,29 +16,43 @@ const DashboardPage: React.FC = () => {
   const statuses = ["backlog", "pending", "active", "inactive", "completed"];
 
   useEffect(() => {
-    if (todos.length === 0) {
+    const allTasks = Object.values(taskCache)
+      .map((project) => project.tasks)
+      .flat();
+
+    if (allTasks.length === 0) {
       setLoading(true);
+      setStatusTasks({});
     } else {
       const statusTasksObj: { [key: string]: any[] } = {};
       statuses.forEach((status) => {
-        statusTasksObj[status] = todos.filter((todo) => todo.status === status);
+        statusTasksObj[status] = allTasks.filter(
+          (task) => task.status === status
+        );
       });
       setStatusTasks(statusTasksObj);
       setLoading(false);
     }
-  }, [todos]);
+  }, [taskCache]);
 
   const updateTaskStatusInFirebase = async (
     taskId: string,
     newStatus: string
   ) => {
     try {
-      const todoRef = doc(db, "todos", taskId);
+      // Find projectId for task
+      const projectId = Object.keys(taskCache).find((pid) =>
+        taskCache[pid].tasks.some((t) => t.id === taskId)
+      );
+      if (!projectId) return;
+
+      const todoRef = doc(db, "Projects", projectId, "tasks", taskId);
       await updateDoc(todoRef, { status: newStatus });
     } catch (error) {
       console.error("Error updating task status:", error);
     }
   };
+
   const handleDragEnd = (event: any) => {
     const { source, destination } = event;
     if (!destination) return;
@@ -66,12 +80,12 @@ const DashboardPage: React.FC = () => {
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="flex gap-2 p-4 w-screen min-h-screen relative  overflow-y-auto scrollbar-thin">
+      <div className="flex gap-2 p-4 w-screen min-h-screen relative overflow-y-auto scrollbar-thin">
         {statuses.map((statusKey) => (
           <Droppable droppableId={statusKey} type="TASK" key={statusKey}>
             {(provided) => (
               <div
-                className="flex-none rounded-2xl shadow-md transition-all duration-300 transform hover:scale-[1.02] p-3 min-w-[200px] max-w-[260px] max-h-min  overflow-y-auto bg-[#101204] text-[#B6C2CF]"
+                className="flex-none rounded-2xl shadow-md transition-all duration-300 transform hover:scale-[1.02] p-3 min-w-[200px] max-w-[260px] max-h-min overflow-y-auto bg-[#101204] text-[#B6C2CF]"
                 ref={provided.innerRef}
                 {...provided.droppableProps}
               >
@@ -79,9 +93,9 @@ const DashboardPage: React.FC = () => {
                   {statusKey}
                 </h2>
 
-                <div className="flex flex-col gap-3 ">
+                <div className="flex flex-col gap-3">
                   {loading ? (
-                    <p>Lodaing..</p>
+                    <p>Loading...</p>
                   ) : (
                     (statusTasks[statusKey] || []).map((todo, index) => (
                       <Draggable
@@ -124,7 +138,7 @@ const DashboardPage: React.FC = () => {
                       </Draggable>
                     ))
                   )}
-                  <div className=" w-full">
+                  <div className="w-full">
                     <div
                       className="flex gap-2 cursor-pointer"
                       onClick={handleShowAdd}
@@ -140,8 +154,7 @@ const DashboardPage: React.FC = () => {
               </div>
             )}
           </Droppable>
-        ))}{" "}
-        {showPopup && <TodoModel />}
+        ))}
       </div>
     </DragDropContext>
   );

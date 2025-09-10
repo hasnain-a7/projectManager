@@ -13,7 +13,7 @@ import {
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
-interface Todo {
+export interface Todo {
   id: string;
   title: string;
   completed: boolean;
@@ -23,6 +23,7 @@ interface Todo {
   status: string;
   categories?: string;
   attechments: string[];
+  dueDate: string;
 }
 
 interface FormData {
@@ -30,6 +31,7 @@ interface FormData {
   description: string;
   status: string;
   attachments: string[];
+  dueDate: string;
 }
 interface Project {
   id?: string;
@@ -37,6 +39,7 @@ interface Project {
   url?: string;
   userId?: string;
   createdAt?: string;
+  dueDate?: string;
 }
 
 interface TodoContextType {
@@ -70,6 +73,10 @@ interface TodoContextType {
   resetForm: () => void;
   projects: Project[];
   setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
+  taskCache: { [key: string]: { title: string; tasks: Todo[] } };
+  setTaskCache: React.Dispatch<
+    React.SetStateAction<{ [key: string]: { title: string; tasks: Todo[] } }>
+  >;
 }
 
 const TaskContext = createContext<TodoContextType | undefined>(undefined);
@@ -83,6 +90,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
     description: "",
     status: "backlog",
     attachments: [],
+    dueDate: "",
   });
   const [editId, setEditId] = useState<string | null>(null);
   const [showPopup, setShowPopup] = useState(false);
@@ -91,7 +99,9 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loading, setLoading] = useState(false);
   const [highlightedTask, setHighlightedTask] = useState<string | null>(null);
   const [projects, setProjects] = React.useState<Project[]>([]);
-
+  const [taskCache, setTaskCache] = useState<{
+    [key: string]: { title: string; tasks: Todo[] };
+  }>({});
   const { userContextId } = useUserContextId();
 
   useEffect(() => {
@@ -139,6 +149,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
           status: formData.status,
           categories: "optional",
           attechments: formData.attachments,
+          dueDate: formData.dueDate,
         };
         const docRef = await addDoc(collection(db, "todos"), newTodo);
         setTodos([{ id: docRef.id, ...newTodo }, ...todos]);
@@ -256,6 +267,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
         description: t.todo,
         status: t.status,
         attachments: t.attechments,
+        dueDate: formData.dueDate,
       });
       setEditId(id);
       setShowPopup(true);
@@ -268,6 +280,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
       description: "",
       status: formData.status,
       attachments: [],
+      dueDate: formData.dueDate,
     });
     setEditId(null);
     setShowPopup(false);
@@ -294,6 +307,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
       description: "",
       status: formData.status,
       attachments: [],
+      dueDate: formData.dueDate,
     });
     setEditId(null);
     setShowPopup(true);
@@ -323,6 +337,8 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
         setProjects,
         addTaskToProjectByTitle,
         setEditId,
+        taskCache,
+        setTaskCache,
       }}
     >
       {children}
