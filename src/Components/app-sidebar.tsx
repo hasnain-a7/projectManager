@@ -1,9 +1,8 @@
 import * as React from "react";
 import { NavLink } from "react-router-dom";
-import { IoMdHome } from "react-icons/io";
+
 import { MdDashboardCustomize } from "react-icons/md";
-import { IoMdAddCircle } from "react-icons/io";
-import { CgAlignLeft } from "react-icons/cg";
+
 import { AiOutlinePlus, AiOutlineDelete } from "react-icons/ai";
 import { Separator } from "../components/ui/separator";
 import { auth } from "../Config/firbase";
@@ -32,7 +31,10 @@ import {
   SidebarMenuItem,
   SidebarRail,
   SidebarInput,
+  useSidebar,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
+
 import { useTaskContext } from "@/TaskContext/TaskContext";
 import {
   DropdownMenu,
@@ -50,12 +52,12 @@ const items = [
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();
-  const [isSidebarCollapsed, setisSidebarCollapsed] = useState<boolean>(false);
+
   const [showInput, setShowInput] = React.useState(false);
   const [newProject, setNewProject] = React.useState("");
   const { userContextId } = useUserContextId();
   const { projects, setProjects } = useTaskContext();
-
+  const { open, setOpen, state } = useSidebar();
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -150,17 +152,27 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const deleteProject = (title: string) => {
     setProjects(projects.filter((p) => p.title !== title));
   };
+  const handleAddClick = () => {
+    if (state === "collapsed") {
+      setOpen(true);
+    }
+    setShowInput(true);
+  };
 
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible="icon" {...props} className="flex flex-col h-full">
       <SidebarContent>
         <SidebarGroup>
-          {/* Main Section */}
           <SidebarGroupLabel>Main</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
-                <SidebarMenuItem key={item.title} className="text-4xl ">
+                <SidebarMenuItem
+                  key={item.title}
+                  className={`flex items-center justify-between text-4xl ${
+                    state == "expanded" ? "flex-row" : "flex-col"
+                  }`}
+                >
                   <NavLink to={item.title}>
                     {({ isActive }) => (
                       <SidebarMenuButton
@@ -181,18 +193,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
             <Separator className="my-2" />
 
-            <div className="flex items-center justify-between ">
-              <SidebarGroupLabel>Projects</SidebarGroupLabel>
-              <button
-                onClick={() => setShowInput(!showInput)}
-                className="p-1 rounded hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer"
-                title="Add Project"
-              >
-                <AiOutlinePlus size={18} />
-              </button>
+            <div
+              className={`flex items-center justify-between ${
+                state == "expanded" ? "flex-row" : "flex-col"
+              }`}
+            >
+              {state == "collapsed" ? (
+                <button
+                  onClick={handleAddClick}
+                  className="p-2 mb-1 rounded hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer"
+                  title="Add Project"
+                >
+                  <AiOutlinePlus size={18} />
+                </button>
+              ) : (
+                <>
+                  <SidebarGroupLabel>Projects</SidebarGroupLabel>
+                  <button
+                    onClick={() => setShowInput(!showInput)}
+                    className="p-1 rounded hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer"
+                    title="Add Project"
+                  >
+                    <AiOutlinePlus size={18} />
+                  </button>
+                </>
+              )}
             </div>
 
-            {showInput && (
+            {showInput && state === "expanded" && (
               <div className="px-2 my-2">
                 <SidebarInput
                   placeholder="New project..."
@@ -208,8 +236,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   Add
                 </button>
                 <button
-                  onClick={() => setShowInput(!showInput)}
-                  className="px-2 py-1 rounded  hover:bg-red-500 hover:text-white ml-1 cursor-pointer"
+                  onClick={() => {
+                    setOpen(false);
+                    setShowInput(false);
+                  }}
+                  className="px-2 py-1 rounded hover:bg-red-500 hover:text-white ml-1 cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -221,17 +252,32 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 projects.map((project: any) => (
                   <SidebarMenuItem
                     key={project.title}
-                    className="flex items-center justify-between"
+                    className={`flex items-center justify-between  ${
+                      state == "expanded"
+                        ? "flex-row"
+                        : "flex-col text-4xl w-full cursor-pointer "
+                    }`}
                   >
-                    <NavLink to={project.url} className="flex-1">
+                    <NavLink
+                      to={project.url}
+                      className="flex-1"
+                      onClick={() => {
+                        setOpen(false);
+                        setShowInput(false);
+                      }}
+                    >
                       {({ isActive }) => (
                         <SidebarMenuButton
                           tooltip={project.title}
                           isActive={isActive}
-                          className="w-full text-left"
+                          className={`flex items-center justify-between ${
+                            state == "expanded"
+                              ? "flex-row"
+                              : "flex-col gap-1 p-1 rounded hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer"
+                          }`}
                         >
-                          <span className="cursor-pointer">
-                            {isSidebarCollapsed
+                          <span className=" pb-1 rounded hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer ">
+                            {state == "collapsed"
                               ? project.title[0] + project.title.slice(-1)
                               : project.title}
                           </span>
@@ -239,8 +285,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       )}
                     </NavLink>
 
-                    {/* Delete button hidden when collapsed */}
-                    {!isSidebarCollapsed && (
+                    {!state && (
                       <button
                         onClick={() => deleteProject(project.title)}
                         className="p-1 rounded hover:bg-red-500 hover:text-white ml-1 cursor-pointer"
@@ -264,8 +309,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <SidebarMenuButton className="w-full justify-start">
-              <FaUser className="mr-2 h-5 w-5" /> Account
+            <SidebarMenuButton
+              className={`flex items-center justify-between ${
+                state === "expanded" ? "flex-none" : "flex-col items-center"
+              }`}
+              onClick={() => {
+                if (state === "collapsed") {
+                  setOpen(true);
+                }
+              }}
+            >
+              <FaUser className="ml-3 h-5 w-5" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-44">

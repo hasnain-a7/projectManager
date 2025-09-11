@@ -42,6 +42,10 @@ const TodoModel: React.FC<TodoModelProps> = ({
   ) => {
     setFormData({ ...formData, description: e.target.value });
   };
+  const handleDateChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setFormData({ ...formData, dueDate: e.target.value });
+    console.log(formData.dueDate);
+  };
 
   const handleSubmit = async () => {
     if (!formData.title) return;
@@ -134,9 +138,7 @@ const TodoModel: React.FC<TodoModelProps> = ({
             type="date"
             id="dueDate"
             value={formData.dueDate || ""}
-            onChange={(e) =>
-              setFormData({ ...formData, dueDate: e.target.value })
-            }
+            onChange={handleDateChange}
             className="border bg-[#22272B] text-[#B6C2CF] border-gray-300 rounded px-2 py-1"
           />
         </div>

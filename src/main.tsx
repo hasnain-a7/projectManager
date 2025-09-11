@@ -20,6 +20,7 @@ import CompeletedTaskPage from "./Pages/CompeletedTaskPage";
 import PersonalPage from "./Pages/PersonalPage";
 import { TaskProvider } from "./TaskContext/TaskContext";
 import ProjectPage from "./Pages/ProjectPage";
+import { ThemeProvider } from "./ThemeContext/theme-provider";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -42,9 +43,11 @@ const router = createBrowserRouter(
 
 const root = ReactDOM.createRoot(document.getElementById("root")!);
 root.render(
-  <UserProvider>
-    <TaskProvider>
-      <RouterProvider router={router} />
-    </TaskProvider>
-  </UserProvider>
+  <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+    <UserProvider>
+      <TaskProvider>
+        <RouterProvider router={router} />
+      </TaskProvider>
+    </UserProvider>
+  </ThemeProvider>
 );

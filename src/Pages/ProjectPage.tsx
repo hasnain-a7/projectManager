@@ -20,6 +20,7 @@ import {
   updateDoc,
   addDoc,
 } from "firebase/firestore";
+import { Divide } from "lucide-react";
 
 interface Todo {
   id: string;
@@ -136,7 +137,6 @@ const ProjectPage: React.FC = () => {
         projectId: projectDocId,
       };
 
-      // ✅ update cache only
       setTaskCache((prev) => ({
         ...prev,
         [projectDocId]: {
@@ -272,40 +272,34 @@ const ProjectPage: React.FC = () => {
   const projectDocId = Object.keys(taskCache).find(
     (id) => taskCache[id].title === projectId
   );
-
+  const projectTitle =
+    projectDocId && taskCache[projectDocId]
+      ? taskCache[projectDocId].title
+      : "Project";
   const specificTask =
     projectDocId && taskCache[projectDocId]
       ? taskCache[projectDocId].tasks
       : [];
-
+  const todayDate = new Date();
   return (
-    <div className="p-2 space-y-2">
-      <div className="flex justify-end w-full">
-        {!loading && (
-          <button
-            className="px-2 py-1 border rounded-md bg-[#22272B] text-gray-300 hover:bg-gray-800 transition-colors"
-            onClick={() => navigate("/")}
-          >
-            View Trello
-          </button>
+    <div className="min-h-screen w-full p-2 space-y-4 flex flex-col">
+      <div className="flex-1 overflow-auto">
+        {loading ? (
+          <div className="flex justify-center items-center h-full py-20">
+            <span className="text-gray-600 text-lg dark:bg-gray-900 text-gray-900 dark:text-white">
+              Loading tasks...
+            </span>
+          </div>
+        ) : (
+          <TaskAccordionTable
+            tasks={specificTask}
+            loading={loading}
+            handleshowpop={handleShowAdd}
+            projectTitle={projectTitle}
+          />
         )}
       </div>
 
-      <button
-        onClick={handleShowAdd}
-        className="fixed bottom-8 right-8 w-12 h-12 flex items-center justify-center rounded-full bg-[#101204] text-white text-lg shadow-md hover:scale-105 transition-transform cursor-pointer"
-      >
-        <FaPlus size={18} />
-      </button>
-
-      {loading ? (
-        <div className="flex justify-center items-center p-8 pt-52">
-          <span className="text-gray-600 text-lg">Loading tasks...</span>
-        </div>
-      ) : (
-        <TaskAccordionTable tasks={specificTask} />
-      )}
-      {/* Edit Modal */}
       {showPopup && projectDocId && (
         <TodoModel
           projectId={projectDocId}
