@@ -163,7 +163,7 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
                       <div className="col-span-3">Created</div>
                     </div>
 
-                    {section.tasks.map((task, index) => (
+                    {section.tasks.map((task) => (
                       <div key={task.id} className="border-b bg-card">
                         <div className="grid grid-cols-12 gap-2 py-2 items-center">
                           <div className="col-span-5">
