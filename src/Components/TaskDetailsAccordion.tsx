@@ -26,18 +26,18 @@ const TaskDetailsAccordion = ({
         </div>
       </AccordionTrigger>
 
-      <AccordionContent className="pb-3">
-        <div className="w-full rounded-lg bg-gray-50 p-3 ">
+      <AccordionContent className="p-2">
+        <div className="w-full rounded-lg bg-muted p-3">
           <div className="flex">
-            <div className="space-y-4">
-              <div className="w-full">
-                <div className="flex items-center mb-2">
-                  <FileText className="h-4 w-4 mr-2 text-gray-500" />
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            <div className="space-y-4 ">
+              <div className="w-full ">
+                <div className="flex items-center mb-2 ">
+                  <FileText className="h-4 w-4 mr-2 text-muted-foreground" />
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                     Description
                   </p>
                 </div>
-                <p className="text-sm w-full text-gray-700 line-clamp-3">
+                <p className="text-sm w-full text-foreground/80 line-clamp-3">
                   {task.todo || "No description"}
                 </p>
               </div>

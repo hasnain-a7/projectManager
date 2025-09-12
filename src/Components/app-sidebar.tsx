@@ -2,7 +2,7 @@ import * as React from "react";
 import { NavLink } from "react-router-dom";
 
 import { MdDashboardCustomize } from "react-icons/md";
-
+import { IoHomeOutline } from "react-icons/io5";
 import { AiOutlinePlus, AiOutlineDelete } from "react-icons/ai";
 import { Separator } from "../components/ui/separator";
 import { auth } from "../Config/firbase";
@@ -32,7 +32,6 @@ import {
   SidebarRail,
   SidebarInput,
   useSidebar,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
 
 import { useTaskContext } from "@/TaskContext/TaskContext";
@@ -47,6 +46,7 @@ import { FaUser, FaSignOutAlt } from "react-icons/fa";
 import { useUserContextId } from "@/AuthContext/UserContext";
 
 const items = [
+  { title: "Home", url: "/home", icon: IoHomeOutline },
   { title: "Dashboard", url: "/dashboard", icon: MdDashboardCustomize },
 ];
 
@@ -74,8 +74,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: `/projects/${newProject.toLowerCase()}`,
         createdAt: serverTimestamp(),
       };
-
-      const docRef = await addDoc(collection(db, "Projects"), projectData);
       setProjects([
         ...projects,
         {
@@ -86,6 +84,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       console.log(projectData);
       setNewProject("");
       setShowInput(false);
+
+      const docRef = await addDoc(collection(db, "Projects"), projectData);
+
       console.log("Project created with ID:", docRef.id);
       return docRef.id;
     } catch (err) {
@@ -160,7 +161,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   };
 
   return (
-    <Sidebar collapsible="icon" {...props} className="flex flex-col h-full">
+    <Sidebar
+      collapsible="icon"
+      {...props}
+      className="flex flex-col h-full bg-background"
+    >
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Main</SidebarGroupLabel>
@@ -179,10 +184,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         tooltip={item.title}
                         isActive={isActive}
                       >
-                        <item.icon
-                          className="h-7 w-3 cursor-pointer"
-                          size={28}
-                        />
+                        <item.icon className=" cursor-pointer" size={32} />
                         <span className="cursor-pointer">{item.title}</span>
                       </SidebarMenuButton>
                     )}
@@ -194,7 +196,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <Separator className="my-2" />
 
             <div
-              className={`flex items-center justify-between ${
+              className={`flex items-center justify-between text-4xl ${
                 state == "expanded" ? "flex-row" : "flex-col"
               }`}
             >
@@ -204,7 +206,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   className="p-2 mb-1 rounded hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer"
                   title="Add Project"
                 >
-                  <AiOutlinePlus size={18} />
+                  <AiOutlinePlus size={20} />
                 </button>
               ) : (
                 <>
@@ -240,7 +242,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     setOpen(false);
                     setShowInput(false);
                   }}
-                  className="px-2 py-1 rounded hover:bg-red-500 hover:text-white ml-1 cursor-pointer"
+                  className="px-2 py-1 rounded hover:bg-red-500 hover:text-foreground ml-1 cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -254,7 +256,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     key={project.title}
                     className={`flex items-center justify-between  ${
                       state == "expanded"
-                        ? "flex-row"
+                        ? "flex-row "
                         : "flex-col text-4xl w-full cursor-pointer "
                     }`}
                   >
@@ -271,13 +273,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           tooltip={project.title}
                           isActive={isActive}
                           className={`flex items-center justify-between ${
-                            state == "expanded"
+                            state === "expanded"
                               ? "flex-row"
                               : "flex-col gap-1 p-1 rounded hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer"
-                          }`}
+                          } ${isActive ? "bg-primary" : ""}`}
                         >
-                          <span className=" pb-1 rounded hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer ">
-                            {state == "collapsed"
+                          <span className="pb-1 rounded hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer">
+                            {state === "collapsed"
                               ? project.title[0] + project.title.slice(-1)
                               : project.title}
                           </span>
@@ -310,8 +312,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
-              className={`flex items-center justify-between ${
-                state === "expanded" ? "flex-none" : "flex-col items-center"
+              className={`flex items-center justify-between  ${
+                state === "expanded"
+                  ? "flex-none"
+                  : "flex-col items-center ml-2"
               }`}
               onClick={() => {
                 if (state === "collapsed") {
@@ -319,7 +323,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 }
               }}
             >
-              <FaUser className="ml-3 h-5 w-5" />
+              <FaUser className=" h-5 w-5" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-44">

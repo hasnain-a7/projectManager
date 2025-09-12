@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useTaskContext } from "../TaskContext/TaskContext";
 import { useUserContextId } from "../AuthContext/UserContext";
 import { IoCloudUploadOutline } from "react-icons/io5";
-
+import "../App.css";
 type userContext = {
   userContextId: string | null;
 };
@@ -109,9 +109,9 @@ const TodoModel: React.FC<TodoModelProps> = ({
   if (!showPopup) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-      <div className="bg-[#22272B] text-[#B6C2CF] flex flex-col rounded-2xl shadow-lg p-6 w-full max-w-md">
-        <h3 className="text-xl font-semibold mb-4 text-[#adb4bd]">
+    <div className="fixed inset-0 bg-background/80 flex justify-center items-center z-50">
+      <div className="bg-card text-card-foreground flex flex-col rounded-2xl shadow-lg p-6 w-full max-w-md">
+        <h3 className="text-xl font-semibold mb-4 text-foreground">
           {editId === null ? "Add Todo" : "Update Todo"}
         </h3>
 
@@ -120,7 +120,7 @@ const TodoModel: React.FC<TodoModelProps> = ({
           placeholder="Enter Title"
           value={formData.title}
           onChange={handleTitleChange}
-          className="w-full p-2 border border-gray-300 rounded-lg mb-3"
+          className="w-full p-2 border border-input rounded-lg mb-3 bg-background text-foreground"
         />
 
         <textarea
@@ -128,10 +128,14 @@ const TodoModel: React.FC<TodoModelProps> = ({
           rows={4}
           value={formData.description}
           onChange={handleDescriptionChange}
-          className="w-full p-2 border border-gray-300 rounded-lg mb-4"
+          className="w-full p-2 border border-input rounded-lg mb-4 bg-background text-foreground"
         />
+
         <div className="flex flex-col w-full mb-4">
-          <label htmlFor="dueDate" className="mb-1 font-semibold">
+          <label
+            htmlFor="dueDate"
+            className="mb-1 font-semibold text-foreground"
+          >
             Due Date:
           </label>
           <input
@@ -139,19 +143,22 @@ const TodoModel: React.FC<TodoModelProps> = ({
             id="dueDate"
             value={formData.dueDate || ""}
             onChange={handleDateChange}
-            className="border bg-[#22272B] text-[#B6C2CF] border-gray-300 rounded px-2 py-1"
+            className="border border-input bg-background text-foreground rounded px-2 py-1"
           />
         </div>
 
         <div className="flex flex-col w-full mb-4">
-          <label htmlFor="status" className="mb-1 font-semibold">
+          <label
+            htmlFor="status"
+            className="mb-1 font-semibold text-foreground"
+          >
             Status:
           </label>
           <select
             id="status"
             value={formData.status}
             onChange={handleStatusChange}
-            className="border bg-[#22272B] text-[#B6C2CF] border-gray-300 rounded px-2 py-1"
+            className="border border-input bg-background text-foreground rounded px-2 py-1"
           >
             <option value="">Select</option>
             <option value="pending">Pending</option>
@@ -163,58 +170,11 @@ const TodoModel: React.FC<TodoModelProps> = ({
           </select>
         </div>
 
-        {editId !== null && (
-          <div className="flex flex-col w-full mb-4">
-            <label htmlFor="status" className="mb-1 font-semibold">
-              Status:
-            </label>
-            <select
-              id="status"
-              value={formData.status}
-              onChange={handleStatusChange}
-              className="border bg-[#22272B] text-[#B6C2CF] border-gray-300 rounded px-2 py-1"
-            >
-              <option value="">Select</option>
-              <option value="pending">Pending</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="cancelled">Cancelled</option>
-              <option value="completed">Completed</option>
-              <option value="backlog">Backlog</option>
-            </select>
-          </div>
-        )}
-
-        <div className="mb-4">
-          <label htmlFor="uploadInput">
-            <input
-              id="uploadInput"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileUpload}
-            />
-            <IoCloudUploadOutline size={28} className="cursor-pointer" />
-          </label>
-          {formData.attachments.length > 0 ? (
-            <div className="mt-3 ">
-              <p className="text-sm text-gray-400 mb-1">Selected Image:</p>
-              <img
-                src={formData.attachments[0]}
-                alt="Selected"
-                className="w-12 h-12 rounded-lg object-cover border-2 border-blue-500"
-              />
-            </div>
-          ) : (
-            <p>No Image Selected</p>
-          )}
-        </div>
-
         <div className="flex justify-end gap-3">
           <button
             onClick={handleSubmit}
             disabled={localLoading || loading}
-            className="px-4 py-2 bg-gradient-to-r from-[#00AECC] to-[#5AC4D4] text-black rounded-lg cursor-pointer disabled:opacity-50"
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg cursor-pointer disabled:opacity-50"
           >
             {localLoading || loading
               ? "Loading..."
@@ -224,7 +184,7 @@ const TodoModel: React.FC<TodoModelProps> = ({
           </button>
           <button
             onClick={handleCancel}
-            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition cursor-pointer"
+            className="px-4 py-2 bg-muted text-muted-foreground rounded-lg hover:bg-accent hover:text-accent-foreground transition cursor-pointer"
           >
             Cancel
           </button>

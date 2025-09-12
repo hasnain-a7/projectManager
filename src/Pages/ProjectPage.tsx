@@ -282,11 +282,11 @@ const ProjectPage: React.FC = () => {
       : [];
   const todayDate = new Date();
   return (
-    <div className="min-h-screen w-full p-2 space-y-4 flex flex-col">
+    <div className="min-h-screen w-full p-2 space-y-4 flex flex-col bg-background text-foreground">
       <div className="flex-1 overflow-auto">
         {loading ? (
           <div className="flex justify-center items-center h-full py-20">
-            <span className="text-gray-600 text-lg dark:bg-gray-900 text-gray-900 dark:text-white">
+            <span className="text-muted-foreground text-lg">
               Loading tasks...
             </span>
           </div>
@@ -301,11 +301,13 @@ const ProjectPage: React.FC = () => {
       </div>
 
       {showPopup && projectDocId && (
-        <TodoModel
-          projectId={projectDocId}
-          addNewTask={addNewTask}
-          updateProjectTask={updateProjectTask}
-        />
+        <div className="rounded-xl border border-border bg-muted p-4 shadow-sm">
+          <TodoModel
+            projectId={projectDocId}
+            addNewTask={addNewTask}
+            updateProjectTask={updateProjectTask}
+          />
+        </div>
       )}
     </div>
   );

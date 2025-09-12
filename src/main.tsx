@@ -21,6 +21,7 @@ import PersonalPage from "./Pages/PersonalPage";
 import { TaskProvider } from "./TaskContext/TaskContext";
 import ProjectPage from "./Pages/ProjectPage";
 import { ThemeProvider } from "./ThemeContext/theme-provider";
+import HomePage from "./Pages/HomePage";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -29,7 +30,7 @@ const router = createBrowserRouter(
       <Route path="/" element={<Layout />}>
         <Route index element={<DashboarPage />} />
         <Route path="/dashboard" element={<DashboarPage />} />
-        <Route path="/add-task" element={<AddTaskPage />} />
+        <Route path="/home" element={<HomePage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/important" element={<ImportedTaskPage />} />
         <Route path="/completed" element={<CompeletedTaskPage />} />

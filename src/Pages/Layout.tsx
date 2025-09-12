@@ -14,20 +14,21 @@ export default function Page() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="bg-zinc-100 dark:bg-gray-900 text-gray-900 dark:text-white flex h-10 shrink-0 items-center  gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-10">
+        <header className="flex h-10 shrink-0 items-center gap-2 border-b bg-background text-foreground transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-10">
           <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="" />
+            <SidebarTrigger />
             <Separator
               orientation="vertical"
-              className=" data-[orientation=vertical]:h-4"
+              className="data-[orientation=vertical]:h-4"
             />
-            <Breadcrumb>Task Manger</Breadcrumb>
+            <Breadcrumb>Task Manager</Breadcrumb>
           </div>
-          <div className="ml-auto  mr-3 flex items-center">
+          <div className="ml-auto mr-3 flex items-center">
             <ThemeToggle />
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-1 p-1  bg-neutral-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+
+        <div className="flex flex-1 flex-col gap-1  bg-muted text-foreground">
           <Outlet />
         </div>
       </SidebarInset>

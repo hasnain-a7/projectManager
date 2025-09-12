@@ -1,7 +1,7 @@
 import React from "react";
 
 const ImportedTaskPage = () => {
-  return <div>Important task here</div>;
+  return <div></div>;
 };
 
 export default ImportedTaskPage;
