@@ -79,24 +79,28 @@ const ProjectCard = ({ title, description, completed, total }: Project) => {
 
 const HomePage = () => {
   return (
-    <div className="p-6">
-      <main className="max-w-7xl mx-auto">
-        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Track all your projects and progress in one place.
-          </p>
-        </header>
+    <div className="[--header-height:calc(--spacing(14))]">
+      <div className="flex flex-1">
+        <main className="max-w-7xl mx-auto p-6 flex-1">
+          <section className="mb-4">
+            <div className="grid  auto-rows-min gap-2 md:grid-cols-3">
+              <div className=" rounded-xl bg-primary" />
 
-        <section>
-          <h2 className="text-xl font-semibold mb-4">My Projects</h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {projects.map((project, index) => (
-              <ProjectCard key={index} {...project} />
-            ))}
-          </div>
-        </section>
-      </main>
+              <div className="bg-muted/50 aspect-video rounded-xl" />
+              <div className="bg-muted/50 aspect-video rounded-xl" />
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold mb-4">My Projects</h2>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {projects.map((project, index) => (
+                <ProjectCard key={index} {...project} />
+              ))}
+            </div>
+          </section>
+        </main>
+      </div>
     </div>
   );
 };

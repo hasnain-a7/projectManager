@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom"; // for dynamic route
+import { useParams } from "react-router-dom";
 import { useTaskContext } from "../TaskContext/TaskContext";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { db } from "../Config/firbase";
 import { updateDoc, doc } from "firebase/firestore";
 import { FaPlus } from "react-icons/fa";
 import TodoModel from "../components/TodoModel";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface TrelloBoardProps {
   projectId?: string;
@@ -25,7 +28,7 @@ const TrelloBoard: React.FC<TrelloBoardProps> = () => {
     let tasks: any[] = [];
 
     if (finalProjectId) {
-      // Only that project’s tasks
+      // Only that project's tasks
       tasks = taskCache[finalProjectId]?.tasks || [];
     } else {
       // Flatten all tasks (dashboard view)
@@ -91,76 +94,81 @@ const TrelloBoard: React.FC<TrelloBoardProps> = () => {
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="flex gap-2 p-4 w-screen min-h-screen relative overflow-y-auto scrollbar-thin">
+      <div className="flex gap-2 p-4 w-full min-h-screen relative overflow-y-auto scrollbar-thin ">
         {statuses.map((statusKey) => (
           <Droppable droppableId={statusKey} type="TASK" key={statusKey}>
             {(provided) => (
-              <div
-                className="flex-none rounded-2xl shadow-md transition-all duration-300 transform hover:scale-[1.02] p-3 min-w-[200px] max-w-[260px] max-h-min overflow-y-auto bg-card text-card-foreground"
+              <Card
+                className="flex-none rounded-2xl shadow-md transition-all duration-300 transform hover:scale-[1.02] min-w-[200px] max-w-[260px] max-h-min overflow-y-auto"
                 ref={provided.innerRef}
                 {...provided.droppableProps}
               >
-                <h2 className="font-bold text-lg mb-3 capitalize text-foreground">
-                  {statusKey}
-                </h2>
+                <CardHeader className="pb-3">
+                  <CardTitle className="font-bold text-lg capitalize">
+                    {statusKey}
+                  </CardTitle>
+                </CardHeader>
 
-                <div className="flex flex-col gap-3">
-                  {loading ? (
-                    <p className="text-muted-foreground">Loading...</p>
-                  ) : (
-                    (statusTasks[statusKey] || []).map((todo, index) => (
-                      <Draggable
-                        key={todo.id}
-                        draggableId={todo.id}
-                        index={index}
-                      >
-                        {(provided) => (
-                          <div
-                            className="relative p-3 flex flex-col gap-2 bg-accent text-muted-foreground rounded-lg shadow-sm hover:shadow-md transition cursor-pointer hover:border border-border"
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                          >
-                            {todo.attechments?.length > 0 && (
-                              <img
-                                src={todo.attechments[0]}
-                                alt="todo-attachment"
-                                className="w-full h-28 object-cover rounded-md"
-                              />
-                            )}
-                            <span
-                              className={`text-sm ${
-                                todo.status === "completed"
-                                  ? "line-through text-muted-foreground"
-                                  : "text-foreground"
-                              }`}
+                <CardContent className="pt-0">
+                  <div className="flex flex-col gap-3">
+                    {loading ? (
+                      <p className="text-muted-foreground">Loading...</p>
+                    ) : (
+                      (statusTasks[statusKey] || []).map((todo, index) => (
+                        <Draggable
+                          key={todo.id}
+                          draggableId={todo.id}
+                          index={index}
+                        >
+                          {(provided) => (
+                            <Card
+                              className="relative cursor-pointer hover:shadow-md transition border-border"
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
                             >
-                              {todo.title}
-                            </span>
-                            {todo.todo && (
-                              <p className="text-xs text-muted-foreground line-clamp-3">
-                                {todo.todo}
-                              </p>
-                            )}
-                          </div>
-                        )}
-                      </Draggable>
-                    ))
-                  )}
-                  <div className="w-full">
-                    <div
-                      className="flex gap-2 cursor-pointer text-muted-foreground hover:text-foreground"
-                      onClick={handleShowAdd}
-                    >
-                      <button className="cursor-pointer">
-                        <FaPlus />
-                      </button>
-                      <h3>Add Card</h3>
+                              <CardContent className="p-3 flex flex-col gap-2">
+                                {todo.attechments?.length > 0 && (
+                                  <img
+                                    src={todo.attechments[0]}
+                                    alt="todo-attachment"
+                                    className="w-full h-28 object-cover rounded-md"
+                                  />
+                                )}
+                                <span
+                                  className={`text-sm ${
+                                    todo.status === "completed"
+                                      ? "line-through text-muted-foreground"
+                                      : "text-foreground"
+                                  }`}
+                                >
+                                  {todo.title}
+                                </span>
+                                {todo.todo && (
+                                  <p className="text-xs text-muted-foreground line-clamp-3">
+                                    {todo.todo}
+                                  </p>
+                                )}
+                              </CardContent>
+                            </Card>
+                          )}
+                        </Draggable>
+                      ))
+                    )}
+                    <div className="w-full">
+                      <Button
+                        variant="ghost"
+                        className="flex gap-2 cursor-pointer text-muted-foreground hover:text-foreground w-full justify-start p-0 h-auto"
+                        onClick={handleShowAdd}
+                      >
+                        <FaPlus className="h-3 w-3" />
+                        <span>Add Card</span>
+                      </Button>
                     </div>
                   </div>
-                </div>
-                {provided.placeholder}
-              </div>
+                  {provided.placeholder}
+                </CardContent>
+              </Card>
             )}
           </Droppable>
         ))}

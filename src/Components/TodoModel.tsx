@@ -1,8 +1,25 @@
 import React, { useState } from "react";
 import { useTaskContext } from "../TaskContext/TaskContext";
 import { useUserContextId } from "../AuthContext/UserContext";
-import { IoCloudUploadOutline } from "react-icons/io5";
-import "../App.css";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import DatePicker from "./DatePicker";
+
 type userContext = {
   userContextId: string | null;
 };
@@ -42,9 +59,24 @@ const TodoModel: React.FC<TodoModelProps> = ({
   ) => {
     setFormData({ ...formData, description: e.target.value });
   };
-  const handleDateChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setFormData({ ...formData, dueDate: e.target.value });
-    console.log(formData.dueDate);
+
+  const handleDateChange = (date: string | null) => {
+    setFormData({ ...formData, dueDate: date || "" });
+  };
+
+  const handleStatusChange = (value: string) => {
+    setFormData({ ...formData, status: value });
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setFormData({
+        ...formData,
+        attachments: [url],
+      });
+    }
   };
 
   const handleSubmit = async () => {
@@ -91,106 +123,87 @@ const TodoModel: React.FC<TodoModelProps> = ({
     setShowPopup(false);
   };
 
-  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFormData({ ...formData, status: e.target.value });
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setFormData({
-        ...formData,
-        attachments: [url],
-      });
-    }
-  };
-
   if (!showPopup) return null;
 
   return (
-    <div className="fixed inset-0 bg-background/80 flex justify-center items-center z-50">
-      <div className="bg-card text-card-foreground flex flex-col rounded-2xl shadow-lg p-6 w-full max-w-md">
-        <h3 className="text-xl font-semibold mb-4 text-foreground">
-          {editId === null ? "Add Todo" : "Update Todo"}
-        </h3>
+    <Dialog open={showPopup} onOpenChange={setShowPopup}>
+      <DialogContent className="sm:max-w-md rounded-xl shadow-2xl">
+        <DialogHeader className="">
+          <DialogTitle className="text-lg font-semibold">
+            {editId === null ? "Add Todo" : "Update Todo"}
+          </DialogTitle>
+        </DialogHeader>
 
-        <input
-          type="text"
-          placeholder="Enter Title"
-          value={formData.title}
-          onChange={handleTitleChange}
-          className="w-full p-2 border border-input rounded-lg mb-3 bg-background text-foreground"
-        />
-
-        <textarea
-          placeholder="Enter Description"
-          rows={4}
-          value={formData.description}
-          onChange={handleDescriptionChange}
-          className="w-full p-2 border border-input rounded-lg mb-4 bg-background text-foreground"
-        />
-
-        <div className="flex flex-col w-full mb-4">
-          <label
-            htmlFor="dueDate"
-            className="mb-1 font-semibold text-foreground"
-          >
-            Due Date:
-          </label>
-          <input
-            type="date"
-            id="dueDate"
-            value={formData.dueDate || ""}
-            onChange={handleDateChange}
-            className="border border-input bg-background text-foreground rounded px-2 py-1"
+        <div className="space-y-3 ">
+          <Input
+            id="title"
+            placeholder="Enter title"
+            value={formData.title}
+            onChange={handleTitleChange}
           />
+
+          <Textarea
+            id="description"
+            placeholder="Enter description..."
+            rows={4}
+            value={formData.description}
+            onChange={handleDescriptionChange}
+            className="h-24"
+          />
+
+          <div className="grid grid-cols-2 gap-2">
+            <Select value={formData.status} onValueChange={handleStatusChange}>
+              <SelectTrigger id="status" className="w-48">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="backlog">Backlog</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <DatePicker
+              value={formData.dueDate || null}
+              onChange={handleDateChange}
+            />
+          </div>
+
+          <div className="  flex items-center gap-2 border border-muted-foreground/30 rounded-md ">
+            <Input
+              id="file"
+              type="file"
+              onChange={handleFileUpload}
+              className="cursor-pointer border-none shadow-none text-sm"
+            />
+          </div>
         </div>
 
-        <div className="flex flex-col w-full mb-4">
-          <label
-            htmlFor="status"
-            className="mb-1 font-semibold text-foreground"
+        <DialogFooter className="flex justify-center items-center gap-2">
+          <Button
+            onClick={handleCancel}
+            variant="outline"
+            className="rounded-md"
           >
-            Status:
-          </label>
-          <select
-            id="status"
-            value={formData.status}
-            onChange={handleStatusChange}
-            className="border border-input bg-background text-foreground rounded px-2 py-1"
-          >
-            <option value="">Select</option>
-            <option value="pending">Pending</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="completed">Completed</option>
-            <option value="backlog">Backlog</option>
-          </select>
-        </div>
-
-        <div className="flex justify-end gap-3">
-          <button
+            Cancel
+          </Button>
+          <Button
             onClick={handleSubmit}
             disabled={localLoading || loading}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg cursor-pointer disabled:opacity-50"
+            className="rounded-md"
           >
             {localLoading || loading
               ? "Loading..."
               : editId === null
               ? "Add"
               : "Update"}
-          </button>
-          <button
-            onClick={handleCancel}
-            className="px-4 py-2 bg-muted text-muted-foreground rounded-lg hover:bg-accent hover:text-accent-foreground transition cursor-pointer"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

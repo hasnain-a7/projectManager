@@ -85,7 +85,7 @@ const DashboardPage: React.FC = () => {
           <Droppable droppableId={statusKey} type="TASK" key={statusKey}>
             {(provided) => (
               <div
-                className="flex-none rounded-2xl shadow-md transition-all duration-300 transform hover:scale-[1.02] p-3 min-w-[200px] max-w-[260px] max-h-min overflow-y-auto bg-[#101204] text-[#B6C2CF]"
+                className="flex-none rounded-2xl shadow-md transition-all duration-300 transform hover:scale-[1.02] p-3 min-w-[200px] max-w-[260px] max-h-min overflow-y-auto bg-background text-[#B6C2CF]"
                 ref={provided.innerRef}
                 {...provided.droppableProps}
               >

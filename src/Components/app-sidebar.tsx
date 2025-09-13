@@ -5,10 +5,9 @@ import { MdDashboardCustomize } from "react-icons/md";
 import { IoHomeOutline } from "react-icons/io5";
 import { AiOutlinePlus, AiOutlineDelete } from "react-icons/ai";
 import { Separator } from "../components/ui/separator";
-import { auth } from "../Config/firbase";
-import { signOut } from "firebase/auth";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+
+import { useEffect } from "react";
+
 import { db } from "../Config/firbase";
 import {
   collection,
@@ -22,28 +21,21 @@ import {
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupLabel,
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
   SidebarInput,
   useSidebar,
+  SidebarHeader,
 } from "@/components/ui/sidebar";
 
 import { useTaskContext } from "@/TaskContext/TaskContext";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
 
-import { FaUser, FaSignOutAlt } from "react-icons/fa";
 import { useUserContextId } from "@/AuthContext/UserContext";
+import SidebarFooter from "./sidebar-footer";
 
 const items = [
   { title: "Home", url: "/home", icon: IoHomeOutline },
@@ -51,21 +43,12 @@ const items = [
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const navigate = useNavigate();
-
   const [showInput, setShowInput] = React.useState(false);
   const [newProject, setNewProject] = React.useState("");
   const { userContextId } = useUserContextId();
   const { projects, setProjects } = useTaskContext();
   const { open, setOpen, state } = useSidebar();
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      navigate("/login");
-    } catch (error: any) {
-      console.error("Logout error:", error.message);
-    }
-  };
+
   const addProject = async () => {
     try {
       const projectData = {
@@ -178,13 +161,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     state == "expanded" ? "flex-row" : "flex-col"
                   }`}
                 >
-                  <NavLink to={item.title}>
+                  <NavLink
+                    to={item.title}
+                    className={`${state == "expanded" ? "w-full" : ""} `}
+                  >
                     {({ isActive }) => (
                       <SidebarMenuButton
                         tooltip={item.title}
                         isActive={isActive}
+                        className={`flex items-center gap-2 w-full ${
+                          isActive ? "bg-primary text-white" : ""
+                        }`}
                       >
-                        <item.icon className=" cursor-pointer" size={32} />
+                        <item.icon className=" cursor-pointer " size={32} />
                         <span className="cursor-pointer">{item.title}</span>
                       </SidebarMenuButton>
                     )}
@@ -233,7 +222,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 />
                 <button
                   onClick={addProject}
-                  className="px-2 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
+                  className="px-2 py-1 rounded bg-primary  cursor-pointer"
                 >
                   Add
                 </button>
@@ -242,7 +231,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     setOpen(false);
                     setShowInput(false);
                   }}
-                  className="px-2 py-1 rounded hover:bg-red-500 hover:text-foreground ml-1 cursor-pointer"
+                  className="px-2 py-1 rounded hover:bg-destructive hover:text-foreground ml-1 cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -298,8 +287,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </SidebarMenuItem>
                 ))
               ) : (
-                <p className="text-sm text-gray-400 p-2">
-                  No projects yet. Add one!
+                <p className="text-sm text-gray-400 ">
+                  {state == "expanded" && <p>No projects yet. Add one!</p>}
                 </p>
               )}
             </SidebarMenu>
@@ -308,36 +297,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
 
       {/* Footer */}
-      <SidebarFooter>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              className={`flex items-center justify-between  ${
-                state === "expanded"
-                  ? "flex-none"
-                  : "flex-col items-center ml-2"
-              }`}
-              onClick={() => {
-                if (state === "collapsed") {
-                  setOpen(true);
-                }
-              }}
-            >
-              <FaUser className=" h-5 w-5" />
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-44">
-            <DropdownMenuItem onClick={() => navigate("/profile")}>
-              <FaUser className="mr-2 h-4 w-4" /> Profile
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleLogout}>
-              <FaSignOutAlt className="mr-2 h-4 w-4" /> Logout
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarFooter>
-
-      <SidebarRail />
+      <SidebarFooter state={state} setopen={setOpen} />
     </Sidebar>
   );
 }

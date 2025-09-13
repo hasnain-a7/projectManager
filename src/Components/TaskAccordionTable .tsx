@@ -26,10 +26,12 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
   loading,
   projectTitle,
   handleshowpop,
+  showDetail,
+  details,
 }) => {
   const navigate = useNavigate();
 
-  // Priority label styles → now semantic
+  console.log(tasks);
   const getPriorityInfo = (dueDate: string | null) => {
     if (!dueDate) {
       return { label: "No Date", className: "bg-muted text-muted-foreground" };
@@ -101,9 +103,9 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
 
   return (
     <div className="min-h-full w-full">
-      <Card className="shadow-sm rounded-2xl bg-card text-card-foreground ">
+      <Card className="shadow-sm rounded-2xl bg-card text-card-foreground">
         <CardHeader>
-          <CardTitle className="flex justify-between items-center text-lg">
+          <CardTitle className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 text-lg">
             <div className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-primary" />
               <h4 className="font-semibold">{projectTitle}'s Tasks</h4>
@@ -155,8 +157,8 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
 
                 <AccordionContent className="px-0 pb-0">
                   <div>
-                    {/* Table Header */}
-                    <div className="grid grid-cols-12 gap-2 px-3 py-2 bg-card text-card-foreground text-xs font-semibold  uppercase">
+                    {/* Table Header - hidden on mobile */}
+                    <div className="hidden sm:grid grid-cols-12 gap-2 px-3 py-2 bg-card text-card-foreground text-xs font-semibold uppercase">
                       <div className="col-span-5">Name</div>
                       <div className="col-span-2">Priority</div>
                       <div className="col-span-2">Due Date</div>
@@ -165,9 +167,14 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
 
                     {section.tasks.map((task) => (
                       <div key={task.id} className="border-b bg-card">
-                        <div className="grid grid-cols-12 gap-2 py-2 items-center">
+                        {/* Desktop grid */}
+                        <div className="hidden sm:grid grid-cols-12 gap-2 py-2 items-center">
                           <div className="col-span-5">
-                            <TaskDetailsAccordion task={task} />
+                            <TaskDetailsAccordion
+                              task={task}
+                              showDetail={showDetail}
+                              details={details}
+                            />
                           </div>
                           <div className="col-span-2 flex items-center">
                             {(() => {
@@ -188,6 +195,38 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
                           </div>
                           <div className="col-span-3 flex items-center">
                             <span className="text-sm">
+                              {task.createdAt
+                                ? new Date(task.createdAt).toLocaleDateString()
+                                : "—"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Mobile stacked view */}
+                        <div className="sm:hidden flex flex-col gap-1 px-3 py-2">
+                          <TaskDetailsAccordion task={task} />
+                          <div className="flex justify-between text-sm">
+                            <span className="font-medium">Priority:</span>
+                            {(() => {
+                              const { label, className } = getPriorityInfo(
+                                task.dueDate
+                              );
+                              return (
+                                <Badge className={className}>{label}</Badge>
+                              );
+                            })()}
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="font-medium">Due Date:</span>
+                            <span>
+                              {task.dueDate
+                                ? new Date(task.dueDate).toLocaleDateString()
+                                : "—"}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="font-medium">Created:</span>
+                            <span>
                               {task.createdAt
                                 ? new Date(task.createdAt).toLocaleDateString()
                                 : "—"}
