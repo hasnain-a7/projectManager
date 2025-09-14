@@ -1,236 +1,195 @@
-import React, { useState } from "react";
-import { useTaskContext } from "../TaskContext/TaskContext";
-import { useUserContextId } from "../AuthContext/UserContext";
-import { IoCloudUploadOutline } from "react-icons/io5";
+"use client";
+import React, { useState, useEffect } from "react";
+import { useTaskContext, type Task } from "../TaskContext/TaskContext";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import DatePicker from "./DatePicker";
 
-type userContext = {
-  userContextId: string | null;
-};
+export interface TaskFormData {
+  title: string;
+  todo: string;
+  status: string;
+  attachments: string[];
+  dueDate: string;
+  createdAt: string;
+}
 
 interface TodoModelProps {
-  projectId: string;
-  updateProjectTask: () => Promise<void>;
-  addNewTask: (
-    projectDocId: string,
-    taskData?: {
-      title: string;
-      todo?: string;
-      status?: string;
-      attechments?: string[];
-      dueDate: string;
-    }
-  ) => Promise<void>;
+  projectTitle: string;
+  showPopup: boolean;
+  setShowPopup: (v: boolean) => void;
+  taskToEdit?: Task;
+  onSubmit?: (formData: TaskFormData) => Promise<void>;
 }
 
 const TodoModel: React.FC<TodoModelProps> = ({
-  projectId,
-  updateProjectTask,
-  addNewTask,
+  projectTitle,
+  showPopup,
+  setShowPopup,
+  taskToEdit,
+  onSubmit,
 }) => {
-  const { formData, setFormData, showPopup, setShowPopup, editId, loading } =
-    useTaskContext();
+  const { setTaskCache } = useTaskContext();
 
-  const { userContextId }: userContext = useUserContextId();
-  const [localLoading, setLocalLoading] = useState(false);
+  const [formData, setFormData] = useState<TaskFormData>({
+    title: "",
+    todo: "",
+    status: "backlog",
+    attachments: [],
+    dueDate: "",
+    createdAt: "",
+  });
 
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, title: e.target.value });
-  };
+  const [loading, setLoading] = useState(false);
 
-  const handleDescriptionChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    setFormData({ ...formData, description: e.target.value });
-  };
-  const handleDateChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setFormData({ ...formData, dueDate: e.target.value });
-    console.log(formData.dueDate);
-  };
+  useEffect(() => {
+    if (taskToEdit) {
+      setFormData({
+        title: taskToEdit.title,
+        todo: taskToEdit.todo,
+        status: taskToEdit.status,
+        attachments: taskToEdit.attachments || [],
+        dueDate: taskToEdit.dueDate || "",
+        createdAt: taskToEdit.createdAt,
+      });
+    }
+  }, [taskToEdit]);
 
   const handleSubmit = async () => {
     if (!formData.title) return;
-
-    setLocalLoading(true);
-
+    setLoading(true);
     try {
-      if (editId === null) {
-        await addNewTask(projectId, {
-          title: formData.title,
-          todo: formData.description,
-          status: formData.status,
-          attechments: formData.attachments,
-          dueDate: formData.dueDate,
+      if (onSubmit) {
+        await onSubmit(formData);
+      } else if (taskToEdit) {
+        setTaskCache((prev) => {
+          const tasks = prev[projectTitle]?.tasks.map((t) =>
+            t.id === taskToEdit.id ? { ...t, ...formData } : t
+          );
+          return { ...prev, [projectTitle]: { ...prev[projectTitle], tasks } };
         });
-      } else {
-        await updateProjectTask();
       }
-
       setFormData({
         title: "",
-        description: "",
-        status: "",
+        todo: "",
+        status: "backlog",
         attachments: [],
         dueDate: "",
+        createdAt: "",
       });
       setShowPopup(false);
     } catch (err) {
-      console.error("Error adding/updating task:", err);
+      console.error("❌ Error saving task:", err);
     } finally {
-      setLocalLoading(false);
+      setLoading(false);
     }
   };
 
   const handleCancel = () => {
     setFormData({
       title: "",
-      description: "",
+      todo: "",
       status: "backlog",
       attachments: [],
       dueDate: "",
+      createdAt: "",
     });
     setShowPopup(false);
-  };
-
-  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFormData({ ...formData, status: e.target.value });
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setFormData({
-        ...formData,
-        attachments: [url],
-      });
-    }
   };
 
   if (!showPopup) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-      <div className="bg-[#22272B] text-[#B6C2CF] flex flex-col rounded-2xl shadow-lg p-6 w-full max-w-md">
-        <h3 className="text-xl font-semibold mb-4 text-[#adb4bd]">
-          {editId === null ? "Add Todo" : "Update Todo"}
-        </h3>
+    <Dialog open={showPopup} onOpenChange={setShowPopup}>
+      <DialogContent className="sm:max-w-md rounded-xl shadow-2xl">
+        <DialogHeader>
+          <DialogTitle>{taskToEdit ? "Edit Task" : "Add Task"}</DialogTitle>
+        </DialogHeader>
 
-        <input
-          type="text"
-          placeholder="Enter Title"
-          value={formData.title}
-          onChange={handleTitleChange}
-          className="w-full p-2 border border-gray-300 rounded-lg mb-3"
-        />
+        <div className="space-y-3">
+          <Input
+            placeholder="Enter title"
+            value={formData.title}
+            onChange={(e) =>
+              setFormData({ ...formData, title: e.target.value })
+            }
+          />
+          <Textarea
+            placeholder="Enter description"
+            rows={4}
+            value={formData.todo}
+            onChange={(e) => setFormData({ ...formData, todo: e.target.value })}
+          />
+          <div className="grid grid-cols-2 gap-2">
+            <Select
+              value={formData.status}
+              onValueChange={(v) => setFormData({ ...formData, status: v })}
+            >
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="backlog">Backlog</SelectItem>
+              </SelectContent>
+            </Select>
 
-        <textarea
-          placeholder="Enter Description"
-          rows={4}
-          value={formData.description}
-          onChange={handleDescriptionChange}
-          className="w-full p-2 border border-gray-300 rounded-lg mb-4"
-        />
-        <div className="flex flex-col w-full mb-4">
-          <label htmlFor="dueDate" className="mb-1 font-semibold">
-            Due Date:
-          </label>
-          <input
-            type="date"
-            id="dueDate"
-            value={formData.dueDate || ""}
-            onChange={handleDateChange}
-            className="border bg-[#22272B] text-[#B6C2CF] border-gray-300 rounded px-2 py-1"
+            <DatePicker
+              value={formData.dueDate || null}
+              onChange={(date) =>
+                setFormData({ ...formData, dueDate: date || "" })
+              }
+            />
+          </div>
+
+          <Input
+            type="file"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file)
+                setFormData({
+                  ...formData,
+                  attachments: [URL.createObjectURL(file)],
+                });
+            }}
           />
         </div>
 
-        <div className="flex flex-col w-full mb-4">
-          <label htmlFor="status" className="mb-1 font-semibold">
-            Status:
-          </label>
-          <select
-            id="status"
-            value={formData.status}
-            onChange={handleStatusChange}
-            className="border bg-[#22272B] text-[#B6C2CF] border-gray-300 rounded px-2 py-1"
-          >
-            <option value="">Select</option>
-            <option value="pending">Pending</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="completed">Completed</option>
-            <option value="backlog">Backlog</option>
-          </select>
-        </div>
-
-        {editId !== null && (
-          <div className="flex flex-col w-full mb-4">
-            <label htmlFor="status" className="mb-1 font-semibold">
-              Status:
-            </label>
-            <select
-              id="status"
-              value={formData.status}
-              onChange={handleStatusChange}
-              className="border bg-[#22272B] text-[#B6C2CF] border-gray-300 rounded px-2 py-1"
-            >
-              <option value="">Select</option>
-              <option value="pending">Pending</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="cancelled">Cancelled</option>
-              <option value="completed">Completed</option>
-              <option value="backlog">Backlog</option>
-            </select>
-          </div>
-        )}
-
-        <div className="mb-4">
-          <label htmlFor="uploadInput">
-            <input
-              id="uploadInput"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileUpload}
-            />
-            <IoCloudUploadOutline size={28} className="cursor-pointer" />
-          </label>
-          {formData.attachments.length > 0 ? (
-            <div className="mt-3 ">
-              <p className="text-sm text-gray-400 mb-1">Selected Image:</p>
-              <img
-                src={formData.attachments[0]}
-                alt="Selected"
-                className="w-12 h-12 rounded-lg object-cover border-2 border-blue-500"
-              />
-            </div>
-          ) : (
-            <p>No Image Selected</p>
-          )}
-        </div>
-
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={handleSubmit}
-            disabled={localLoading || loading}
-            className="px-4 py-2 bg-gradient-to-r from-[#00AECC] to-[#5AC4D4] text-black rounded-lg cursor-pointer disabled:opacity-50"
-          >
-            {localLoading || loading
-              ? "Loading..."
-              : editId === null
-              ? "Add"
-              : "Update"}
-          </button>
-          <button
-            onClick={handleCancel}
-            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition cursor-pointer"
-          >
+        <DialogFooter className="flex justify-center gap-2">
+          <Button variant="outline" onClick={handleCancel}>
             Cancel
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+          <Button onClick={handleSubmit} disabled={loading}>
+            {loading
+              ? taskToEdit
+                ? "Saving..."
+                : "Adding..."
+              : taskToEdit
+              ? "Save"
+              : "Add Task"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

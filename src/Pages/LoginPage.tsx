@@ -1,17 +1,11 @@
-import React from "react";
-import SignIn from "../Components/SignIn";
+import SignIn from "@/components/SignIn";
 
-const LoginPage = () => {
+export default function LoginPage() {
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-[#59448A] to-[#884C85] font-sans">
-      <div className="bg-gradient bg-transparent border text-white from-[#59448A] to-[#884C85] p-10 rounded-xl shadow-lg w-80 text-center">
-        <h2 className="text-2xl font-semibold  text-[#101204] mb-6">
-          Welcome back
-        </h2>
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm p-">
         <SignIn />
       </div>
     </div>
   );
-};
-
-export default LoginPage;
+}

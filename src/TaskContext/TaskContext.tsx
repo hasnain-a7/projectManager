@@ -4,36 +4,30 @@ import { db, auth } from "../Config/firbase";
 import {
   collection,
   addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
   query,
   where,
   getDocs,
+  deleteDoc,
+  doc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
-export interface Todo {
-  id: string;
+// 🔹 Task type
+export interface Task {
+  id?: string; // Firestore ID
   title: string;
-  completed: boolean;
-  createdAt: string;
   todo: string;
-  userId: string;
+  createdAt: string;
   status: string;
-  categories?: string;
-  attechments: string[];
-  dueDate: string;
+  attachments?: string[];
+  dueDate?: string;
+  userId?: string | null;
+  projectId?: string;
 }
 
-interface FormData {
-  title: string;
-  description: string;
-  status: string;
-  attachments: string[];
-  dueDate: string;
-}
-interface Project {
+// 🔹 Project type
+export interface Project {
   id?: string;
   title: string;
   url?: string;
@@ -42,128 +36,119 @@ interface Project {
   dueDate?: string;
 }
 
-interface TodoContextType {
-  todos: Todo[];
-  formData: FormData;
-  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+// 🔹 Context type
+interface TaskContextType {
+  projects: Project[];
+  setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
+  taskCache: { [key: string]: { title: string; tasks: Task[] } };
+  setTaskCache: React.Dispatch<
+    React.SetStateAction<{ [key: string]: { title: string; tasks: Task[] } }>
+  >;
   loading: boolean;
-  showPopup: boolean;
-  setShowPopup: React.Dispatch<React.SetStateAction<boolean>>;
-  highlightedTask: string | null;
-  addTodo: (userId: string) => void;
-  updateTodo: () => void;
-  deleteTodo: (id: string) => void;
-  openEdit: (id: string) => void;
-  handleTaskSearch: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  taskSearchInput: string;
-  filteredTasks: Todo[];
+
+  // Tasks
   addTaskToProjectByTitle: (
     projectTitle: string,
     userId: string,
     formData: {
       title: string;
-      description: string;
+      todo: string;
       status: string;
       attachments?: string[];
+      dueDate?: string;
     }
   ) => Promise<string>;
-  setEditId: (id: string | null) => void;
-  handleShowAdd: () => void;
-  editId: string | null;
-  resetForm: () => void;
-  projects: Project[];
-  setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
-  taskCache: { [key: string]: { title: string; tasks: Todo[] } };
-  setTaskCache: React.Dispatch<
-    React.SetStateAction<{ [key: string]: { title: string; tasks: Todo[] } }>
-  >;
+  deleteTaskFromProject: (
+    projectTitle: string,
+    userId: string | null,
+    taskId: string
+  ) => Promise<void>;
+
+  // Projects
+  fetchUserProjects: (userId: string) => Promise<void>;
+  addProject: (title: string, userId: string) => Promise<string>;
+  deleteProject: (projectId: string) => Promise<void>;
 }
 
-const TaskContext = createContext<TodoContextType | undefined>(undefined);
+const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [todos, setTodos] = useState<Todo[]>([]);
-  const [formData, setFormData] = useState<FormData>({
-    title: "",
-    description: "",
-    status: "backlog",
-    attachments: [],
-    dueDate: "",
-  });
-  const [editId, setEditId] = useState<string | null>(null);
-  const [showPopup, setShowPopup] = useState(false);
-  const [taskSearchInput, settaskSearchInput] = useState("");
-  const [filteredTasks, setFilteredTasks] = useState<Todo[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [highlightedTask, setHighlightedTask] = useState<string | null>(null);
-  const [projects, setProjects] = React.useState<Project[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [taskCache, setTaskCache] = useState<{
-    [key: string]: { title: string; tasks: Todo[] };
+    [key: string]: { title: string; tasks: Task[] };
   }>({});
+  const [loading, setLoading] = useState(false);
   const { userContextId } = useUserContextId();
 
-  useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const fetchTodos = async () => {
-          try {
-            setLoading(true);
-            const q = query(
-              collection(db, "todos"),
-              where("userId", "==", user.uid)
-            );
-            const querySnapshot = await getDocs(q);
-            const todosData = querySnapshot.docs.map((doc) => ({
-              ...doc.data(),
-              id: doc.id,
-            })) as Todo[];
-            setTodos(todosData);
-            console.log(todosData);
-          } catch (err) {
-            console.error("Error fetching todos:", err);
-          } finally {
-            setLoading(false);
-          }
-        };
-        fetchTodos();
-      } else {
-        setTodos([]);
-      }
-    });
-
-    return () => unsubscribeAuth();
-  }, []);
-
-  const addTodo = async (userId: string) => {
-    if (formData.title.length > 3 && formData.description) {
+  const fetchUserProjects = async (userId: string) => {
+    try {
       setLoading(true);
-      try {
-        const newTodo = {
-          title: formData.title,
-          todo: formData.description,
-          completed: false,
-          createdAt: new Date().toLocaleString(),
-          userId: userId ?? "",
-          status: formData.status,
-          categories: "optional",
-          attechments: formData.attachments,
-          dueDate: formData.dueDate,
-        };
-        const docRef = await addDoc(collection(db, "todos"), newTodo);
-        setTodos([{ id: docRef.id, ...newTodo }, ...todos]);
-        console.log(todos);
-        setHighlightedTask(docRef.id);
-        setTimeout(() => setHighlightedTask(null), 3000);
-        resetForm();
-      } catch (err) {
-        console.error("Error adding todo:", err);
-      } finally {
-        setLoading(false);
+
+      const q = query(
+        collection(db, "Projects"),
+        where("userId", "==", userId)
+      );
+      const querySnapshot = await getDocs(q);
+
+      const projectsData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Project[];
+
+      setProjects(projectsData);
+
+      // Fetch tasks for each project
+      const cache: { [key: string]: { title: string; tasks: Task[] } } = {};
+      for (const project of projectsData) {
+        const taskSnap = await getDocs(
+          collection(db, "Projects", project.id!, "tasks")
+        );
+        const tasks = taskSnap.docs.map((d) => ({
+          id: d.id,
+          ...d.data(),
+        })) as Task[];
+
+        cache[project.id!] = { title: project.title, tasks };
       }
-    } else {
-      alert("Please enter a valid title and description.");
+      setTaskCache(cache);
+      console.log("✅ Projects & tasks loaded", { projectsData, cache });
+    } catch (err) {
+      console.error("❌ Error fetching projects:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addProject = async (title: string, userId: string) => {
+    if (!title.trim() || !userId) return "";
+
+    const projectData = {
+      title,
+      userId,
+      url: `/projects/${title.toLowerCase().replace(/\s+/g, "-")}`,
+      createdAt: serverTimestamp(),
+    };
+
+    const docRef = await addDoc(collection(db, "Projects"), projectData);
+
+    setProjects((prev) => [
+      ...prev,
+      { id: docRef.id, ...projectData, createdAt: new Date().toISOString() },
+    ]);
+
+    console.log("✅ Project created:", projectData);
+    return docRef.id;
+  };
+
+  const deleteProject = async (projectId: string) => {
+    try {
+      await deleteDoc(doc(db, "Projects", projectId));
+      setProjects((prev) => prev.filter((p) => p.id !== projectId));
+      console.log("🗑️ Project deleted:", projectId);
+    } catch (err) {
+      console.error("❌ Error deleting project:", err);
     }
   };
 
@@ -172,41 +157,50 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
     userId: string,
     formData: {
       title: string;
-      description: string;
+      todo: string;
       status: string;
       attachments?: string[];
+      dueDate?: string;
     }
-  ) => {
+  ): Promise<string> => {
     try {
+      // Find project
       const q = query(
         collection(db, "Projects"),
         where("title", "==", projectTitle),
         where("userId", "==", userId)
       );
-
       const querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
+      if (querySnapshot.empty)
         throw new Error(`Project "${projectTitle}" not found for this user`);
-      }
 
       const projectDoc = querySnapshot.docs[0];
       const projectId = projectDoc.id;
 
-      const newTask = {
+      // ✅ Create new task object
+      const newTask: Task = {
         title: formData.title,
-        todo: formData.description,
-        completed: false,
-        createdAt: new Date().toLocaleString(),
+        todo: formData.todo,
         status: formData.status,
         attachments: formData.attachments || [],
+        createdAt: new Date().toISOString(),
         userId: userContextId,
+        dueDate: formData.dueDate,
       };
 
       const taskRef = await addDoc(
         collection(db, "Projects", projectId, "tasks"),
         newTask
       );
+      console.log(newTask);
+
+      setTaskCache((prev) => ({
+        ...prev,
+        [projectId]: {
+          ...prev[projectId],
+          tasks: [...(prev[projectId]?.tasks || []), newTask],
+        },
+      }));
 
       console.log(`✅ Task added to project "${projectTitle}":`, taskRef.id);
       return taskRef.id;
@@ -216,129 +210,71 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const updateTodo = async () => {
-    if (editId && userContextId) {
-      setLoading(true);
-      try {
-        const todoRef = doc(db, "todos", editId);
-        await updateDoc(todoRef, {
-          title: formData.title,
-          todo: formData.description,
-          status: formData.status,
-        });
-        setTodos(
-          todos.map((t) =>
-            t.id === editId
-              ? {
-                  ...t,
-                  title: formData.title,
-                  todo: formData.description,
-                  status: formData.status,
-                }
-              : t
-          )
-        );
-        resetForm();
-      } catch (err) {
-        console.error("Error updating todo:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  const deleteTodo = async (id: string) => {
-    if (window.confirm("Delete this todo?") && userContextId) {
-      try {
-        await deleteDoc(doc(db, "todos", id));
-        setTodos(todos.filter((t) => t.id !== id));
-        setFilteredTasks(filteredTasks.filter((t) => t.id !== id));
-      } catch (err) {
-        console.error("Error deleting todo:", err);
-      }
-    }
-  };
-
-  const openEdit = (id: string) => {
-    const t = todos.find((todo) => todo.id === id);
-    if (t && t.userId === userContextId) {
-      setFormData({
-        title: t.title,
-        description: t.todo,
-        status: t.status,
-        attachments: t.attechments,
-        dueDate: formData.dueDate,
-      });
-      setEditId(id);
-      setShowPopup(true);
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      title: "",
-      description: "",
-      status: formData.status,
-      attachments: [],
-      dueDate: formData.dueDate,
-    });
-    setEditId(null);
-    setShowPopup(false);
-  };
-
-  const handleTaskSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    settaskSearchInput(value);
-    if (value.trim()) {
-      const filtered = todos.filter(
-        (todo) =>
-          todo.title.toLowerCase().includes(value.toLowerCase()) ||
-          todo.todo.toLowerCase().includes(value.toLowerCase())
+  const deleteTaskFromProject = async (
+    projectTitle: string,
+    userId: string | null,
+    taskId: string
+  ): Promise<void> => {
+    try {
+      const q = query(
+        collection(db, "Projects"),
+        where("title", "==", projectTitle),
+        where("userId", "==", userId)
       );
-      setFilteredTasks(filtered);
-    } else {
-      setFilteredTasks([]);
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty)
+        throw new Error(`Project "${projectTitle}" not found for this user`);
+
+      const projectDoc = querySnapshot.docs[0];
+      const projectId = projectDoc.id;
+
+      const taskRef = doc(db, "Projects", projectId, "tasks", taskId);
+
+      await deleteDoc(taskRef);
+
+      setTaskCache((prev) => ({
+        ...prev,
+        [projectId]: {
+          ...prev[projectId],
+          tasks:
+            prev[projectId]?.tasks.filter((task) => task.id !== taskId) || [],
+        },
+      }));
+
+      console.log(`✅ Task ${taskId} deleted from project "${projectTitle}"`);
+    } catch (err) {
+      console.error("❌ Error deleting task:", err);
+      throw err;
     }
   };
 
-  const handleShowAdd = () => {
-    setFormData({
-      title: "",
-      description: "",
-      status: formData.status,
-      attachments: [],
-      dueDate: formData.dueDate,
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        fetchUserProjects(user.uid);
+      } else {
+        setProjects([]);
+        setTaskCache({});
+      }
     });
-    setEditId(null);
-    setShowPopup(true);
-  };
+
+    return () => unsubscribeAuth();
+  }, []);
 
   return (
     <TaskContext.Provider
       value={{
-        todos,
-        formData,
-        setFormData,
-        loading,
-        showPopup,
-        setShowPopup,
-        highlightedTask,
-        addTodo,
-        updateTodo,
-        deleteTodo,
-        openEdit,
-        handleTaskSearch,
-        taskSearchInput,
-        filteredTasks,
-        handleShowAdd,
-        editId,
-        resetForm,
         projects,
         setProjects,
-        addTaskToProjectByTitle,
-        setEditId,
         taskCache,
         setTaskCache,
+        loading,
+        addTaskToProjectByTitle,
+        fetchUserProjects,
+        addProject,
+        deleteProject,
+        deleteTaskFromProject,
       }}
     >
       {children}

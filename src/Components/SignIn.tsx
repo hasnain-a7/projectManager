@@ -9,36 +9,43 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useUserContextId } from "../AuthContext/UserContext";
 
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
-  const { setUserId } = useUserContextId();
+  const { setUserId, userContextId } = useUserContextId();
   const dummyPassword = "123456";
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-
       if (currentUser && currentUser.email) {
         navigate("/");
       }
     });
-
     return () => unsubscribe();
   }, [navigate]);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
         dummyPassword
       );
-
       console.log("✅ New user created:", userCredential.user.uid);
       setUserId(userCredential.user.uid);
     } catch (error: any) {
@@ -50,8 +57,7 @@ const SignIn: React.FC = () => {
             dummyPassword
           );
           setUserId(userCredentialLogin.user.uid);
-
-          console.log("✅ Logged in:", userCredentialLogin.user.uid);
+          console.log("✅ Logged in:", userContextId);
         } catch (loginError: any) {
           console.error("❌ Login error:", loginError.message);
           alert(`Login failed: ${loginError.message}`);
@@ -64,52 +70,45 @@ const SignIn: React.FC = () => {
       setLoading(false);
     }
   };
-  const handleNavigtion = () => {
-    navigate("/");
-  };
-  if (user && user.email) {
-    return (
-      <div className="login-box">
-        <p>✅ You're signed in as {user.email}</p>
-        <button onClick={handleNavigtion}>Go to Home</button>
-      </div>
-    );
-  }
+
   const handleloginchange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
   };
 
   return (
-    <div className="flex flex-col items-center gap-4 ">
-      <form
-        onSubmit={handleLoginSubmit}
-        className="w-full flex flex-col items-center gap-4"
-      >
-        <div className="w-full">
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={handleloginchange}
-            placeholder="Enter your email"
-            required
-            disabled={loading}
-            className="w-full px-4 py-2 border-none text-[#B6C2CF] rounded-lg text-base bg-[#1D2125] outline-none placeholder:text-[#B6C2CF]"
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={loading || !email.trim()}
-          className={`w-full px-4 py-2 rounded-lg text-white font-medium transition-colors duration-200 cursor-pointer ${
-            loading || !email.trim()
-              ? "bg-gray-400 text-black cursor-not-allowed"
-              : "bg-[#1a202c] hover:bg-gray-700"
-          }`}
-        >
-          {loading ? "Processing" : "Login"}
-        </button>
-      </form>
-    </div>
+    <Card className="w-[90%] max-w-sm shadow-lg ">
+      <CardHeader>
+        <CardTitle className="text-2xl text-center">Welcome </CardTitle>
+        <CardDescription className="text-center mb-2">
+          Enter your email to continue
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleLoginSubmit} className="flex flex-col gap-2">
+          <div className="grid gap-1">
+            <Input
+              type="email"
+              id="email"
+              value={email}
+              onChange={handleloginchange}
+              placeholder="johndoe@mail.com"
+              required
+              disabled={loading}
+            />
+          </div>
+
+          <div className="flex flex-col gap-3 mb-2">
+            <Button
+              type="submit"
+              disabled={loading || !email.trim()}
+              className="w-full cursor-pointer"
+            >
+              {loading ? "Processing..." : "Login"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 

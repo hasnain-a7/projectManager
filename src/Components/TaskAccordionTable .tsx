@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+"use client";
+
+import React from "react";
 import { Plus, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { Todo } from "@/TaskContext/TaskContext";
+import type { Task } from "@/TaskContext/TaskContext";
 import { useNavigate } from "react-router-dom";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import {
   Accordion,
   AccordionContent,
@@ -14,9 +15,9 @@ import {
 } from "@/components/ui/accordion";
 import TaskDetailsAccordion from "./TaskDetailsAccordion";
 
-// Props
+import { useUserContextId } from "@/AuthContext/UserContext";
 interface TaskAccordionTableProps {
-  tasks: Todo[];
+  tasks: Task[];
   loading: boolean;
   handleshowpop: () => void;
   projectTitle: string;
@@ -29,81 +30,73 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
   handleshowpop,
 }) => {
   const navigate = useNavigate();
+  const userContextId = useUserContextId(); // get current userId
 
-  const getPriorityInfo = (dueDate: string | null) => {
-    if (!dueDate) {
-      return {
-        label: "No Date",
-        className: "bg-gray-200 text-gray-700",
-      };
-    }
+  // const handleDeleteTask = async (taskId: string) => {
+  //   if (!userContextId) return;
 
+  //   const confirmDelete = window.confirm(
+  //     "Are you sure you want to delete this task?"
+  //   );
+  //   if (!confirmDelete) return;
+
+  //   try {
+  //     await deleteTaskFromProject(projectTitle, userContextId, taskId);
+  //     alert("Task deleted successfully!");
+  //   } catch (err) {
+  //     console.error(err);
+  //     alert("Failed to delete task.");
+  //   }
+  // };
+  const getPriorityInfo = (dueDate: string) => {
     const today = new Date();
     const due = new Date(dueDate);
     const diffInTime = due.getTime() - today.getTime();
     const diffInDays = Math.ceil(diffInTime / (1000 * 3600 * 24));
 
-    if (diffInDays < 0) {
+    if (diffInDays < 0)
       return {
         label: "Overdue",
-        className: "bg-gray-300 text-gray-900 line-through",
+        className: "bg-destructive text-destructive-foreground line-through",
       };
-    }
-    if (diffInDays <= 2) {
-      return {
-        label: "High",
-        className: "bg-red-200 text-red-800",
-      };
-    }
-    if (diffInDays <= 7) {
+    if (diffInDays <= 2)
+      return { label: "High", className: "bg-primary text-primary-foreground" };
+    if (diffInDays <= 7)
       return {
         label: "Medium",
-        className: "bg-yellow-200 text-yellow-800",
+        className: "bg-secondary text-secondary-foreground",
       };
-    }
-    return {
-      label: "Low",
-      className: "bg-green-200 text-green-800",
-    };
+    return { label: "Low", className: "bg-accent text-accent-foreground" };
   };
 
-  // Define fixed statuses in desired order
   const STATUSES = ["backlog", "pending", "inactive", "active", "completed"];
 
-  // Group tasks by their status
+  // Group tasks by status, ensure dueDate is always a string
   const groupedTasks = tasks.reduce((acc, task) => {
-    const status = task.status || "backlog"; // default to backlog
+    const status = task.status || "backlog";
     if (!acc[status]) acc[status] = [];
-
     acc[status].push({
       ...task,
       dueDate: task.dueDate || new Date().toISOString().split("T")[0],
-    });
+    } as Task & { dueDate: string });
     return acc;
-  }, {} as Record<string, Todo[]>);
+  }, {} as Record<string, (Task & { dueDate: string })[]>);
 
-  // Create sections in fixed order
   const taskSections = STATUSES.map((status) => {
-    let badgeColor = "bg-gray-100 text-gray-800";
-
+    let badgeColor = "bg-muted text-muted-foreground";
     switch (status) {
-      case "backlog":
-        badgeColor = "bg-gray-200 text-gray-800";
-        break;
       case "pending":
-        badgeColor = "bg-yellow-100 text-yellow-800";
-        break;
-      case "inactive":
-        badgeColor = "bg-gray-300 text-gray-700";
+        badgeColor =
+          "bg-yellow-200 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
         break;
       case "active":
-        badgeColor = "bg-blue-100 text-blue-800";
+        badgeColor = "bg-primary text-primary-foreground";
         break;
       case "completed":
-        badgeColor = "bg-green-100 text-green-800";
+        badgeColor =
+          "bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200";
         break;
     }
-
     return {
       id: status,
       title: status.charAt(0).toUpperCase() + status.slice(1),
@@ -114,29 +107,27 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
 
   return (
     <div className="min-h-full w-full">
-      <Card className="shadow-sm rounded-2xl">
+      <Card className="shadow-sm rounded-2xl ">
         <CardHeader>
-          <CardTitle className="flex justify-between items-center text-lg">
+          <CardTitle className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 text-lg">
             <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-blue-600" />
-              <h4 className="font-semibold text-gray-900">
-                {projectTitle}'s Tasks
-              </h4>
+              <FileText className="h-5 w-5 text-primary" />
+              <h4 className="font-semibold">{projectTitle}'s Tasks</h4>
             </div>
 
             {!loading && (
-              <div className="flex gap-2 bg-gray-50">
+              <div className="flex gap-2">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className=" w-auto items-center justify-center bg-gray-300 text-gray-600 hover:bg-gray-500 hover:text-white cursor-pointer"
+                  className="cursor-pointer"
                   onClick={handleshowpop}
                 >
-                  <Plus className="h-4 w-4 " />
+                  <Plus className="h-4 w-4" />
                 </Button>
                 <Button
                   size="sm"
-                  className="bg-gray-900 text-gray-200 cursor-pointer hover:bg-gray-800"
+                  className="cursor-pointer"
                   onClick={() => navigate("/")}
                 >
                   View Trello
@@ -149,11 +140,11 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
         <CardContent>
           <Accordion
             type="multiple"
-            defaultValue={["backlog", "in-progress"]}
+            defaultValue={["backlog"]}
             className="space-y-2"
           >
             {taskSections.map((section) => (
-              <AccordionItem key={section.id} value={section.id} className=" ">
+              <AccordionItem key={section.id} value={section.id}>
                 <AccordionTrigger className="px-3 py-2 hover:no-underline">
                   <div className="flex items-center">
                     <Badge
@@ -161,7 +152,7 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
                     >
                       {section.title}
                     </Badge>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-muted-foreground">
                       • {section.tasks.length} Task
                       {section.tasks.length !== 1 ? "s" : ""}
                     </span>
@@ -170,38 +161,30 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
 
                 <AccordionContent className="px-0 pb-0">
                   <div>
-                    {/* Table Header */}
-                    <div className="grid grid-cols-12 gap-2 px-3 py-2 bg-gray-50 text-xs font-semibold text-gray-600 uppercase">
+                    <div className="hidden sm:grid grid-cols-12 gap-2 px-3 py-2 bg-card text-card-foreground text-xs font-semibold uppercase">
                       <div className="col-span-5">Name</div>
                       <div className="col-span-2">Priority</div>
                       <div className="col-span-2">Due Date</div>
-                      <div className="col-span-3">Created Da</div>
+                      <div className="col-span-3">Created</div>
                     </div>
 
-                    {section.tasks.map((task, index) => (
-                      <div
-                        key={task.id}
-                        className={`border-b ${
-                          index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                        }`}
-                      >
-                        <div className="grid grid-cols-12 gap-2 py-2 items-center">
+                    {section.tasks.map((task) => (
+                      <div key={task.id} className="border-b bg-card">
+                        <div className="hidden sm:grid grid-cols-12 gap-2 py-2 items-center">
                           <div className="col-span-5">
                             <TaskDetailsAccordion task={task} />
                           </div>
                           <div className="col-span-2 flex items-center">
-                            {(() => {
-                              const { label, className } = getPriorityInfo(
-                                task.dueDate
-                              );
-                              return (
-                                <Badge className={className}>{label}</Badge>
-                              );
-                            })()}
+                            <Badge
+                              className={
+                                getPriorityInfo(task.dueDate).className
+                              }
+                            >
+                              {getPriorityInfo(task.dueDate).label}
+                            </Badge>
                           </div>
                           <div className="col-span-2 flex items-center">
                             <span className="text-sm">
-                              {" "}
                               {task.dueDate
                                 ? new Date(task.dueDate).toLocaleDateString()
                                 : "—"}
@@ -209,6 +192,36 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
                           </div>
                           <div className="col-span-3 flex items-center">
                             <span className="text-sm">
+                              {task.createdAt
+                                ? new Date(task.createdAt).toLocaleDateString()
+                                : "—"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="sm:hidden flex flex-col gap-1 px-3 py-2">
+                          <TaskDetailsAccordion task={task} />
+                          <div className="flex justify-between text-sm">
+                            <span className="font-medium">Priority:</span>
+                            <Badge
+                              className={
+                                getPriorityInfo(task.dueDate).className
+                              }
+                            >
+                              {getPriorityInfo(task.dueDate).label}
+                            </Badge>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="font-medium">Due Date:</span>
+                            <span>
+                              {task.dueDate
+                                ? new Date(task.dueDate).toLocaleDateString()
+                                : "—"}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="font-medium">Created:</span>
+                            <span>
                               {task.createdAt
                                 ? new Date(task.createdAt).toLocaleDateString()
                                 : "—"}
