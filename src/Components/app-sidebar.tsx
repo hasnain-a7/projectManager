@@ -296,7 +296,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer */}
       <SidebarFooter state={state} setopen={setOpen} />
     </Sidebar>
   );

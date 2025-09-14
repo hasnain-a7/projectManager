@@ -31,7 +31,7 @@ const TaskDetailsAccordion = ({
           </AccordionTrigger>
 
           <AccordionContent className="p-2">
-            <div className="w-full rounded-lg bg-muted p-3">
+            <div className="w-full rounded-lg bg-muted p-3 relative">
               <div className="flex">
                 <div className="space-y-4 ">
                   <div className="w-full ">
@@ -42,10 +42,6 @@ const TaskDetailsAccordion = ({
                           Description
                         </p>
                       </div>{" "}
-                      <Eye
-                        size={20}
-                        onClick={() => setShowDetail(!showDetail)}
-                      />
                     </div>
 
                     <p className="text-sm w-full text-foreground/80 line-clamp-3">
@@ -53,7 +49,12 @@ const TaskDetailsAccordion = ({
                     </p>
                   </div>
                 </div>
-              </div>
+              </div>{" "}
+              <Eye
+                size={20}
+                onClick={() => setShowDetail(!showDetail)}
+                className="absolute top-2 right-2"
+              />
             </div>
           </AccordionContent>
         </AccordionItem>
