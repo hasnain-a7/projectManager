@@ -24,7 +24,7 @@ const SignIn: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
-  const { setUserId } = useUserContextId();
+  const { setUserId, userContextId } = useUserContextId();
   const dummyPassword = "123456";
 
   useEffect(() => {
@@ -57,7 +57,7 @@ const SignIn: React.FC = () => {
             dummyPassword
           );
           setUserId(userCredentialLogin.user.uid);
-          console.log("✅ Logged in:", userCredentialLogin.user.uid);
+          console.log("✅ Logged in:", userContextId);
         } catch (loginError: any) {
           console.error("❌ Login error:", loginError.message);
           alert(`Login failed: ${loginError.message}`);

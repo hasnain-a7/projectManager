@@ -7,10 +7,11 @@ import {
 import { Eye, FileText } from "lucide-react";
 import { useState } from "react";
 import TaskDetailModal from "./TrelloDetailPage";
+import type { Task } from "@/TaskContext/TaskContext";
 const TaskDetailsAccordion = ({
   task,
 }: {
-  task: Todo & { dueDate: string };
+  task: Task & { dueDate: string };
 }) => {
   const [showDetail, setShowDetail] = useState(false);
 
@@ -25,7 +26,7 @@ const TaskDetailsAccordion = ({
             <div className="flex items-center w-full cursor-pointer">
               <div className="w-2 h-2 rounded-full bg-cyan-400 mr-3" />
               <span className="flex-1 text-sm font-medium text-left truncate">
-                {(task.title || task.name)?.split(" ").slice(0, 4).join(" ")}
+                {task.title?.split(" ").slice(0, 4).join(" ")}
               </span>
             </div>
           </AccordionTrigger>
@@ -45,7 +46,7 @@ const TaskDetailsAccordion = ({
                     </div>
 
                     <p className="text-sm w-full text-foreground/80 line-clamp-3">
-                      {task.todo || "No description"}
+                      {task.todo}
                     </p>
                   </div>
                 </div>

@@ -13,7 +13,7 @@ import { FaUser, FaSignOutAlt } from "react-icons/fa";
 import { auth } from "../Config/firbase";
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-
+import { useUserContextId } from "@/AuthContext/UserContext";
 interface SidebarFooterProps {
   setopen: (open: boolean) => void;
   state: string;
@@ -21,9 +21,11 @@ interface SidebarFooterProps {
 
 const SidebarFooter: React.FC<SidebarFooterProps> = ({ setopen, state }) => {
   const navigate = useNavigate();
+  const { userContextId } = useUserContextId();
 
   const handleLogout = async () => {
     try {
+      console.log(userContextId, "user logout Successfully");
       await signOut(auth);
       navigate("/login");
     } catch (error: any) {

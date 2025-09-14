@@ -6,18 +6,6 @@ import { IoHomeOutline } from "react-icons/io5";
 import { AiOutlinePlus, AiOutlineDelete } from "react-icons/ai";
 import { Separator } from "../components/ui/separator";
 
-import { useEffect } from "react";
-
-import { db } from "../Config/firbase";
-import {
-  collection,
-  addDoc,
-  serverTimestamp,
-  query,
-  where,
-  getDocs,
-} from "firebase/firestore";
-
 import {
   Sidebar,
   SidebarContent,
@@ -29,11 +17,9 @@ import {
   SidebarMenuItem,
   SidebarInput,
   useSidebar,
-  SidebarHeader,
 } from "@/components/ui/sidebar";
 
 import { useTaskContext } from "@/TaskContext/TaskContext";
-
 import { useUserContextId } from "@/AuthContext/UserContext";
 import SidebarFooter from "./sidebar-footer";
 
@@ -46,101 +32,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [showInput, setShowInput] = React.useState(false);
   const [newProject, setNewProject] = React.useState("");
   const { userContextId } = useUserContextId();
-  const { projects, setProjects } = useTaskContext();
+  const { projects, fetchUserProjects, addProject, deleteProject } =
+    useTaskContext();
   const { open, setOpen, state } = useSidebar();
 
-  const addProject = async () => {
-    try {
-      const projectData = {
-        title: newProject,
-        userId: userContextId,
-        url: `/projects/${newProject.toLowerCase()}`,
-        createdAt: serverTimestamp(),
-      };
-      setProjects([
-        ...projects,
-        {
-          title: newProject,
-          url: `/projects/${newProject.toLowerCase()}`,
-        },
-      ]);
-      console.log(projectData);
-      setNewProject("");
-      setShowInput(false);
-
-      const docRef = await addDoc(collection(db, "Projects"), projectData);
-
-      console.log("Project created with ID:", docRef.id);
-      return docRef.id;
-    } catch (err) {
-      console.error("Error creating project:", err);
-    }
-  };
-  const fetchUserProjects = async () => {
-    try {
-      const q = query(
-        collection(db, "Projects"),
-        where("userId", "==", userContextId)
-      );
-
-      const querySnapshot = await getDocs(q);
-
-      const projects = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        title: doc.data().title,
-        url: doc.data().url,
-        userId: doc.data().userId,
-        createdAt: doc.data().createdAt,
-      }));
-      setProjects(projects);
-      console.log("✅ User projects:", projects);
-      return projects;
-    } catch (err) {
-      console.error("❌ Error fetching projects:", err);
-      return [];
-    }
-  };
-  useEffect(() => {
-    if (userContextId) {
-      fetchUserProjects();
-    }
+  // Load projects on user change
+  React.useEffect(() => {
+    if (userContextId) fetchUserProjects(userContextId);
   }, [userContextId]);
-  // const addProject = async () => {
-  //   if (!newProject.trim()) return;
 
-  //   const projectTitle = newProject.trim();
-  //   const urlSafe = `/projects/${projectTitle
-  //     .toLowerCase()
-  //     .replace(/\s+/g, "-")}`;
-
-  //   const newProjectData = {
-  //     title: projectTitle,
-  //     url: urlSafe,
-  //     createdAt: serverTimestamp(),
-  //   };
-
-  //   try {
-  //     await addDoc(collection(db, "categories"), newProjectData);
-
-  //     setProjects([...projects, newProjectData]);
-
-  //     setNewProject("");
-  //     setShowInput(false);
-
-  //     console.log("Project added:", newProjectData);
-  //   } catch (error) {
-  //     console.error("Error adding project:", error);
-  //   }
-  // };
-
-  const deleteProject = (title: string) => {
-    setProjects(projects.filter((p) => p.title !== title));
-  };
   const handleAddClick = () => {
-    if (state === "collapsed") {
-      setOpen(true);
-    }
+    if (state === "collapsed") setOpen(true);
     setShowInput(true);
+  };
+
+  const handleAddProject = async () => {
+    if (!newProject.trim() || !userContextId) return;
+    await addProject(newProject, userContextId);
+    setNewProject("");
+    setShowInput(false);
   };
 
   return (
@@ -158,12 +68,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenuItem
                   key={item.title}
                   className={`flex items-center justify-between text-4xl ${
-                    state == "expanded" ? "flex-row" : "flex-col"
+                    state === "expanded" ? "flex-row" : "flex-col"
                   }`}
                 >
                   <NavLink
-                    to={item.title}
-                    className={`${state == "expanded" ? "w-full" : ""} `}
+                    to={item.url}
+                    className={`${state === "expanded" ? "w-full" : ""}`}
                   >
                     {({ isActive }) => (
                       <SidebarMenuButton
@@ -173,7 +83,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           isActive ? "bg-primary text-white" : ""
                         }`}
                       >
-                        <item.icon className=" cursor-pointer " size={32} />
+                        <item.icon className="cursor-pointer" size={32} />
                         <span className="cursor-pointer">{item.title}</span>
                       </SidebarMenuButton>
                     )}
@@ -184,15 +94,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
             <Separator className="my-2" />
 
+            {/* Projects Section */}
             <div
               className={`flex items-center justify-between text-4xl ${
-                state == "expanded" ? "flex-row" : "flex-col"
+                state === "expanded" ? "flex-row" : "flex-col"
               }`}
             >
-              {state == "collapsed" ? (
+              {state === "collapsed" ? (
                 <button
                   onClick={handleAddClick}
-                  className="p-2 mb-1 rounded hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer"
+                  className="p-2 mb-1 rounded hover:bg-sidebar-accent cursor-pointer"
                   title="Add Project"
                 >
                   <AiOutlinePlus size={20} />
@@ -202,7 +113,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <SidebarGroupLabel>Projects</SidebarGroupLabel>
                   <button
                     onClick={() => setShowInput(!showInput)}
-                    className="p-1 rounded hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer"
+                    className="p-1 rounded hover:bg-sidebar-accent cursor-pointer"
                     title="Add Project"
                   >
                     <AiOutlinePlus size={18} />
@@ -217,12 +128,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   placeholder="New project..."
                   value={newProject}
                   onChange={(e) => setNewProject(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && addProject()}
+                  onKeyDown={(e) => e.key === "Enter" && handleAddProject()}
                   className="mb-1"
                 />
                 <button
-                  onClick={addProject}
-                  className="px-2 py-1 rounded bg-primary  cursor-pointer"
+                  onClick={handleAddProject}
+                  className="px-2 py-1 rounded bg-primary cursor-pointer"
                 >
                   Add
                 </button>
@@ -231,26 +142,27 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     setOpen(false);
                     setShowInput(false);
                   }}
-                  className="px-2 py-1 rounded hover:bg-destructive hover:text-foreground ml-1 cursor-pointer"
+                  className="px-2 py-1 rounded hover:bg-destructive ml-1 cursor-pointer"
                 >
                   Cancel
                 </button>
               </div>
             )}
 
+            {/* Projects list */}
             <SidebarMenu>
               {projects.length > 0 ? (
-                projects.map((project: any) => (
+                projects.map((project) => (
                   <SidebarMenuItem
-                    key={project.title}
-                    className={`flex items-center justify-between  ${
-                      state == "expanded"
-                        ? "flex-row "
-                        : "flex-col text-4xl w-full cursor-pointer "
+                    key={project.id}
+                    className={`flex items-center justify-between ${
+                      state === "expanded"
+                        ? "flex-row"
+                        : "flex-col text-4xl w-full cursor-pointer"
                     }`}
                   >
                     <NavLink
-                      to={project.url}
+                      to={project.url!}
                       className="flex-1"
                       onClick={() => {
                         setOpen(false);
@@ -264,10 +176,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           className={`flex items-center justify-between ${
                             state === "expanded"
                               ? "flex-row"
-                              : "flex-col gap-1 p-1 rounded hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer"
+                              : "flex-col gap-1 p-1 rounded hover:bg-sidebar-accent cursor-pointer"
                           } ${isActive ? "bg-primary" : ""}`}
                         >
-                          <span className="pb-1 rounded hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer">
+                          <span className="cursor-pointer">
                             {state === "collapsed"
                               ? project.title[0] + project.title.slice(-1)
                               : project.title}
@@ -278,7 +190,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
                     {!state && (
                       <button
-                        onClick={() => deleteProject(project.title)}
+                        onClick={() => deleteProject(project.id!)}
                         className="p-1 rounded hover:bg-red-500 hover:text-white ml-1 cursor-pointer"
                       >
                         <AiOutlineDelete size={16} />
@@ -287,8 +199,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </SidebarMenuItem>
                 ))
               ) : (
-                <p className="text-sm text-gray-400 ">
-                  {state == "expanded" && <p>No projects yet. Add one!</p>}
+                <p className="text-sm text-gray-400">
+                  {state === "expanded" && "No projects yet. Add one!"}
                 </p>
               )}
             </SidebarMenu>

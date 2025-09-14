@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { useTaskContext } from "../TaskContext/TaskContext";
-import { useUserContextId } from "../AuthContext/UserContext";
+"use client";
+import React, { useState, useEffect } from "react";
+import { useTaskContext, type Task } from "../TaskContext/TaskContext";
 import {
   Dialog,
   DialogContent,
@@ -20,105 +20,94 @@ import {
 } from "@/components/ui/select";
 import DatePicker from "./DatePicker";
 
-type userContext = {
-  userContextId: string | null;
-};
+export interface TaskFormData {
+  title: string;
+  todo: string;
+  status: string;
+  attachments: string[];
+  dueDate: string;
+  createdAt: string;
+}
 
 interface TodoModelProps {
-  projectId: string;
-  updateProjectTask: () => Promise<void>;
-  addNewTask: (
-    projectDocId: string,
-    taskData?: {
-      title: string;
-      todo?: string;
-      status?: string;
-      attechments?: string[];
-      dueDate: string;
-    }
-  ) => Promise<void>;
+  projectTitle: string;
+  showPopup: boolean;
+  setShowPopup: (v: boolean) => void;
+  taskToEdit?: Task;
+  onSubmit?: (formData: TaskFormData) => Promise<void>;
 }
 
 const TodoModel: React.FC<TodoModelProps> = ({
-  projectId,
-  updateProjectTask,
-  addNewTask,
+  projectTitle,
+  showPopup,
+  setShowPopup,
+  taskToEdit,
+  onSubmit,
 }) => {
-  const { formData, setFormData, showPopup, setShowPopup, editId, loading } =
-    useTaskContext();
+  const { setTaskCache } = useTaskContext();
 
-  const { userContextId }: userContext = useUserContextId();
-  const [localLoading, setLocalLoading] = useState(false);
+  const [formData, setFormData] = useState<TaskFormData>({
+    title: "",
+    todo: "",
+    status: "backlog",
+    attachments: [],
+    dueDate: "",
+    createdAt: "",
+  });
 
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, title: e.target.value });
-  };
+  const [loading, setLoading] = useState(false);
 
-  const handleDescriptionChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    setFormData({ ...formData, description: e.target.value });
-  };
-
-  const handleDateChange = (date: string | null) => {
-    setFormData({ ...formData, dueDate: date || "" });
-  };
-
-  const handleStatusChange = (value: string) => {
-    setFormData({ ...formData, status: value });
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
+  useEffect(() => {
+    if (taskToEdit) {
       setFormData({
-        ...formData,
-        attachments: [url],
+        title: taskToEdit.title,
+        todo: taskToEdit.todo,
+        status: taskToEdit.status,
+        attachments: taskToEdit.attachments || [],
+        dueDate: taskToEdit.dueDate || "",
+        createdAt: taskToEdit.createdAt,
       });
     }
-  };
+  }, [taskToEdit]);
 
   const handleSubmit = async () => {
     if (!formData.title) return;
-
-    setLocalLoading(true);
-
+    setLoading(true);
     try {
-      if (editId === null) {
-        await addNewTask(projectId, {
-          title: formData.title,
-          todo: formData.description,
-          status: formData.status,
-          attechments: formData.attachments,
-          dueDate: formData.dueDate,
+      if (onSubmit) {
+        await onSubmit(formData);
+      } else if (taskToEdit) {
+        setTaskCache((prev) => {
+          const tasks = prev[projectTitle]?.tasks.map((t) =>
+            t.id === taskToEdit.id ? { ...t, ...formData } : t
+          );
+          return { ...prev, [projectTitle]: { ...prev[projectTitle], tasks } };
         });
-      } else {
-        await updateProjectTask();
       }
-
       setFormData({
         title: "",
-        description: "",
-        status: "",
+        todo: "",
+        status: "backlog",
         attachments: [],
         dueDate: "",
+        createdAt: "",
       });
       setShowPopup(false);
     } catch (err) {
-      console.error("Error adding/updating task:", err);
+      console.error("❌ Error saving task:", err);
     } finally {
-      setLocalLoading(false);
+      setLoading(false);
     }
   };
 
   const handleCancel = () => {
     setFormData({
       title: "",
-      description: "",
+      todo: "",
       status: "backlog",
       attachments: [],
       dueDate: "",
+      createdAt: "",
     });
     setShowPopup(false);
   };
@@ -128,32 +117,30 @@ const TodoModel: React.FC<TodoModelProps> = ({
   return (
     <Dialog open={showPopup} onOpenChange={setShowPopup}>
       <DialogContent className="sm:max-w-md rounded-xl shadow-2xl">
-        <DialogHeader className="">
-          <DialogTitle className="text-lg font-semibold">
-            {editId === null ? "Add Todo" : "Update Todo"}
-          </DialogTitle>
+        <DialogHeader>
+          <DialogTitle>{taskToEdit ? "Edit Task" : "Add Task"}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-3 ">
+        <div className="space-y-3">
           <Input
-            id="title"
             placeholder="Enter title"
             value={formData.title}
-            onChange={handleTitleChange}
+            onChange={(e) =>
+              setFormData({ ...formData, title: e.target.value })
+            }
           />
-
           <Textarea
-            id="description"
-            placeholder="Enter description..."
+            placeholder="Enter description"
             rows={4}
-            value={formData.description}
-            onChange={handleDescriptionChange}
-            className="h-24"
+            value={formData.todo}
+            onChange={(e) => setFormData({ ...formData, todo: e.target.value })}
           />
-
           <div className="grid grid-cols-2 gap-2">
-            <Select value={formData.status} onValueChange={handleStatusChange}>
-              <SelectTrigger id="status" className="w-48">
+            <Select
+              value={formData.status}
+              onValueChange={(v) => setFormData({ ...formData, status: v })}
+            >
+              <SelectTrigger className="w-48">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -168,38 +155,37 @@ const TodoModel: React.FC<TodoModelProps> = ({
 
             <DatePicker
               value={formData.dueDate || null}
-              onChange={handleDateChange}
+              onChange={(date) =>
+                setFormData({ ...formData, dueDate: date || "" })
+              }
             />
           </div>
 
-          <div className="  flex items-center gap-2 border border-muted-foreground/30 rounded-md ">
-            <Input
-              id="file"
-              type="file"
-              onChange={handleFileUpload}
-              className="cursor-pointer border-none shadow-none text-sm"
-            />
-          </div>
+          <Input
+            type="file"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file)
+                setFormData({
+                  ...formData,
+                  attachments: [URL.createObjectURL(file)],
+                });
+            }}
+          />
         </div>
 
-        <DialogFooter className="flex justify-center items-center gap-2">
-          <Button
-            onClick={handleCancel}
-            variant="outline"
-            className="rounded-md"
-          >
+        <DialogFooter className="flex justify-center gap-2">
+          <Button variant="outline" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={localLoading || loading}
-            className="rounded-md"
-          >
-            {localLoading || loading
-              ? "Loading..."
-              : editId === null
-              ? "Add"
-              : "Update"}
+          <Button onClick={handleSubmit} disabled={loading}>
+            {loading
+              ? taskToEdit
+                ? "Saving..."
+                : "Adding..."
+              : taskToEdit
+              ? "Save"
+              : "Add Task"}
           </Button>
         </DialogFooter>
       </DialogContent>
