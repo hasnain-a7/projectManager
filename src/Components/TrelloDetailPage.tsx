@@ -10,9 +10,11 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent bg-opacity-50 transition-all ease-in duration-100">
-      <div className="h-[400px] w-[1000px] flex bg-[#22272B] rounded-lg overflow-hidden relative shadow-lg ">
+      <div className="h-[400px] w-[1000px] flex bg-card rounded-lg overflow-hidden relative shadow-lg ">
         <div className="w-1/2 p-5 flex flex-col justify-between overflow-y-auto">
-          <h2 className="text-2xl font-bold text-white mb-4">{task.title}</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-4">
+            {task.title}
+          </h2>
 
           {task.todo && (
             <div className="mb-4">

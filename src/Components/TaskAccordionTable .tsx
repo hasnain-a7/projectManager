@@ -107,7 +107,7 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
 
   return (
     <div className="min-h-full w-full">
-      <Card className="shadow-sm rounded-2xl bg-card text-card-foreground">
+      <Card className="shadow-sm rounded-2xl ">
         <CardHeader>
           <CardTitle className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 text-lg">
             <div className="flex items-center gap-2">

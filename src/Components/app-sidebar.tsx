@@ -34,9 +34,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { userContextId } = useUserContextId();
   const { projects, fetchUserProjects, addProject, deleteProject } =
     useTaskContext();
-  const { open, setOpen, state } = useSidebar();
+  const { setOpen, state } = useSidebar();
 
-  // Load projects on user change
   React.useEffect(() => {
     if (userContextId) fetchUserProjects(userContextId);
   }, [userContextId]);
@@ -84,7 +83,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         }`}
                       >
                         <item.icon className="cursor-pointer" size={32} />
-                        <span className="cursor-pointer">{item.title}</span>
+                        <span
+                          className="cursor-pointer "
+                          onClick={() => setShowInput(!showInput)}
+                        >
+                          {item.title}
+                        </span>
                       </SidebarMenuButton>
                     )}
                   </NavLink>
@@ -149,7 +153,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </div>
             )}
 
-            {/* Projects list */}
             <SidebarMenu>
               {projects.length > 0 ? (
                 projects.map((project) => (

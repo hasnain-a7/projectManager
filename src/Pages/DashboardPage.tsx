@@ -4,11 +4,8 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { db } from "../Config/firbase";
 import { updateDoc, doc } from "firebase/firestore";
 
-import { FaPlus } from "react-icons/fa";
-import TodoModel from "../components/TodoModel";
-
 const DashboardPage: React.FC = () => {
-  const { taskCache, handleShowAdd, showPopup } = useTaskContext();
+  const { taskCache } = useTaskContext();
 
   const [statusTasks, setStatusTasks] = useState<{ [key: string]: any[] }>({});
   const [loading, setLoading] = useState(true);
@@ -85,11 +82,11 @@ const DashboardPage: React.FC = () => {
           <Droppable droppableId={statusKey} type="TASK" key={statusKey}>
             {(provided) => (
               <div
-                className="flex-none rounded-2xl shadow-md transition-all duration-300 transform hover:scale-[1.02] p-3 min-w-[200px] max-w-[260px] max-h-min overflow-y-auto bg-background text-[#B6C2CF]"
+                className="flex-none rounded-2xl shadow-md transition-all duration-300 transform hover:scale-[1.02] p-3 min-w-[200px] max-w-[260px] max-h-min overflow-y-auto bg-background text-foreground"
                 ref={provided.innerRef}
                 {...provided.droppableProps}
               >
-                <h2 className="font-bold text-lg mb-3 capitalize text-[#B6C2CF]">
+                <h2 className="font-bold text-lg mb-3 capitalize text-card-foreground">
                   {statusKey}
                 </h2>
 
@@ -105,7 +102,7 @@ const DashboardPage: React.FC = () => {
                       >
                         {(provided) => (
                           <div
-                            className="relative p-3 flex flex-col gap-2 bg-[#2f383f] text-[#B6C2CF] rounded-lg shadow-sm hover:shadow-md transition cursor-pointer hover:border border-white"
+                            className="relative p-3 flex flex-col gap-2 bg-accent text-accent-foreground rounded-lg shadow-sm hover:shadow-md transition cursor-pointer hover:border border-white"
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
@@ -122,14 +119,14 @@ const DashboardPage: React.FC = () => {
                               className={`text-sm ${
                                 todo.status === "completed"
                                   ? "line-through text-gray-500"
-                                  : "text-[#B6C2CF]"
+                                  : "text-foreground"
                               }`}
                             >
                               {todo.title}
                             </span>
 
                             {todo.todo && (
-                              <p className="text-xs text-[#9DAAB6] line-clamp-3">
+                              <p className="text-xs text-accent-foreground line-clamp-3">
                                 {todo.todo}
                               </p>
                             )}
@@ -138,17 +135,7 @@ const DashboardPage: React.FC = () => {
                       </Draggable>
                     ))
                   )}
-                  <div className="w-full">
-                    <div
-                      className="flex gap-2 cursor-pointer"
-                      onClick={handleShowAdd}
-                    >
-                      <button className="cursor-pointer">
-                        <FaPlus />
-                      </button>
-                      <h3>Add Card</h3>
-                    </div>
-                  </div>
+                  <div className="w-full"></div>
                 </div>
                 {provided.placeholder}
               </div>
