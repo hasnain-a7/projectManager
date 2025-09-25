@@ -28,6 +28,7 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
   loading,
   projectTitle,
   handleshowpop,
+  showPopup,
 }) => {
   const navigate = useNavigate();
   const userContextId = useUserContextId(); // get current userId
@@ -172,7 +173,12 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
                       <div key={task.id} className="border-b bg-card">
                         <div className="hidden sm:grid grid-cols-12 gap-2 py-2 items-center">
                           <div className="col-span-5">
-                            <TaskDetailsAccordion task={task} />
+                            <TaskDetailsAccordion
+                              task={task}
+                              projectTitle={projectTitle}
+                              handleShowPop={handleshowpop}
+                              showPopup={showPopup}
+                            />
                           </div>
                           <div className="col-span-2 flex items-center">
                             <Badge
@@ -200,7 +206,11 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
                         </div>
 
                         <div className="sm:hidden flex flex-col gap-1 px-3 py-2">
-                          <TaskDetailsAccordion task={task} />
+                          <TaskDetailsAccordion
+                            task={task}
+                            projectTitle={projectTitle}
+                            handleShowPop={handleshowpop}
+                          />
                           <div className="flex justify-between text-sm">
                             <span className="font-medium">Priority:</span>
                             <Badge

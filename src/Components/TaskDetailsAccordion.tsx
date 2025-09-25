@@ -7,13 +7,41 @@ import {
 import { Eye, FileText } from "lucide-react";
 import { useState } from "react";
 import TaskDetailModal from "./TrelloDetailPage";
+import { MdDeleteOutline } from "react-icons/md";
+import { FaEdit } from "react-icons/fa";
 import type { Task } from "@/TaskContext/TaskContext";
+import { useTaskContext } from "@/TaskContext/TaskContext";
+import TodoModel from "./TodoModel";
 const TaskDetailsAccordion = ({
   task,
+  projectTitle,
+  handleShowPop,
+  showPopup,
 }: {
   task: Task & { dueDate: string };
+  projectTitle: string;
+  handleShowPop: (a: boolean) => void;
 }) => {
   const [showDetail, setShowDetail] = useState(false);
+  const [showEdit, setshowEdit] = useState(false);
+  const { deleteTaskFromProject } = useTaskContext();
+
+  const handleEditClick = () => {
+    handleShowPop(true);
+  };
+  const handleDelChange = async () => {
+    try {
+      if (window.confirm("Are you sure you want to delete this task?")) {
+        await deleteTaskFromProject(
+          projectTitle,
+          task.userId ?? null,
+          task.id ?? ""
+        );
+      }
+    } catch (error) {
+      console.log("err: ", error);
+    }
+  };
 
   return (
     <>
@@ -25,7 +53,7 @@ const TaskDetailsAccordion = ({
           <AccordionTrigger className="hover:no-underline px-3 py-1">
             <div className="flex items-center w-full cursor-pointer">
               <div className="w-2 h-2 rounded-full bg-cyan-400 mr-3" />
-              <span className="flex-1 text-sm font-medium text-left truncate">
+              <span className="flex w-full text-sm font-medium justify-between truncate">
                 {task.title?.split(" ").slice(0, 4).join(" ")}
               </span>
             </div>
@@ -42,7 +70,7 @@ const TaskDetailsAccordion = ({
                         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                           Description
                         </p>
-                      </div>{" "}
+                      </div>
                     </div>
 
                     <p className="text-sm w-full text-foreground/80 line-clamp-3">
@@ -50,11 +78,21 @@ const TaskDetailsAccordion = ({
                     </p>
                   </div>
                 </div>
-              </div>{" "}
+              </div>
               <Eye
                 size={20}
                 onClick={() => setShowDetail(!showDetail)}
                 className="absolute top-2 right-2"
+              />
+              <FaEdit
+                size={16}
+                onClick={handleEditClick}
+                className="absolute top-2 right-14"
+              />
+              <MdDeleteOutline
+                size={18}
+                className="absolute top-2 right-8"
+                onClick={handleDelChange}
               />
             </div>
           </AccordionContent>
@@ -63,7 +101,15 @@ const TaskDetailsAccordion = ({
       {showDetail && (
         <TaskDetailModal task={task} onClose={() => setShowDetail(false)} />
       )}
+      {showPopup && (
+        <TodoModel
+          taskToEdit={task}
+          projectTitle={projectTitle}
+          showPopup={showPopup}
+        />
+      )}
     </>
   );
 };
+
 export default TaskDetailsAccordion;

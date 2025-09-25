@@ -15,7 +15,7 @@ import { onAuthStateChanged } from "firebase/auth";
 
 // 🔹 Task type
 export interface Task {
-  id?: string; // Firestore ID
+  id?: string;
   title: string;
   todo: string;
   createdAt: string;
@@ -216,6 +216,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
     taskId: string
   ): Promise<void> => {
     try {
+      setLoading(true);
       const q = query(
         collection(db, "Projects"),
         where("title", "==", projectTitle),
@@ -246,6 +247,8 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
     } catch (err) {
       console.error("❌ Error deleting task:", err);
       throw err;
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -31,8 +31,8 @@ export interface TaskFormData {
 
 interface TodoModelProps {
   projectTitle: string;
-  showPopup: boolean;
-  setShowPopup: (v: boolean) => void;
+  showPopup?: boolean;
+  setShowPopup?: (v: boolean) => void;
   taskToEdit?: Task;
   onSubmit?: (formData: TaskFormData) => Promise<void>;
 }
