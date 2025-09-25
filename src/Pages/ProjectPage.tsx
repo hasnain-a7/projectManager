@@ -30,7 +30,6 @@ const ProjectPage: React.FC = () => {
       const newTask: Task = {
         id: taskId,
         ...formData,
-
         userId,
       };
 
@@ -55,7 +54,7 @@ const ProjectPage: React.FC = () => {
       <div className="flex-1 overflow-auto">
         {loading ? (
           <div className="flex justify-center items-center h-full py-20">
-            <span className="text-muted-foreground text-lg">
+            <span className=" text-muted-foreground text-lg">
               Loading tasks...
             </span>
           </div>

@@ -116,3 +116,20 @@
     @apply bg-background text-foreground;
   }
 }
+@plugin 'tailwind-scrollbar';
+@layer base {
+  ::-webkit-scrollbar {
+    @apply scrollbar-thin;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-accent rounded-full;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: bg-background;
+}

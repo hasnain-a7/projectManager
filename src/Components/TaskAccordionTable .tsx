@@ -30,7 +30,7 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
   handleshowpop,
 }) => {
   const navigate = useNavigate();
-  const userContextId = useUserContextId(); // get current userId
+  const userContextId = useUserContextId();
 
   // const handleDeleteTask = async (taskId: string) => {
   //   if (!userContextId) return;
@@ -128,7 +128,7 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
                 <Button
                   size="sm"
                   className="cursor-pointer"
-                  onClick={() => navigate("/")}
+                  onClick={() => navigate("/dashboard")}
                 >
                   View Trello
                 </Button>

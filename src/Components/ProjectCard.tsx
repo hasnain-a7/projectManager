@@ -61,7 +61,7 @@ export const ProjectCard = ({ project, tasks, onClick }: ProjectCardProps) => {
       <CardHeader className="">
         <div className="flex justify-between items-start">
           <Badge variant="outline" className="text-xs font-medium">
-            {project?.label || "UX Researcher"}
+            {project?.label || "Personal"}
           </Badge>
 
           <button className="text-muted-foreground hover:text-foreground">

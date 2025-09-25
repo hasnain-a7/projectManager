@@ -91,7 +91,7 @@ const SignIn: React.FC = () => {
               id="email"
               value={email}
               onChange={handleloginchange}
-              placeholder="johndoe@mail.com"
+              placeholder="example123@gmail.com"
               required
               disabled={loading}
             />

@@ -32,7 +32,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [showInput, setShowInput] = React.useState(false);
   const [newProject, setNewProject] = React.useState("");
   const { userContextId } = useUserContextId();
-  const { projects, fetchUserProjects, addProject, deleteProject } =
+  const { projects, fetchUserProjects, addProject, deleteProject, loading } =
     useTaskContext();
   const { setOpen, state } = useSidebar();
 
@@ -85,7 +85,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         <item.icon className="cursor-pointer" size={32} />
                         <span
                           className="cursor-pointer "
-                          onClick={() => setShowInput(!showInput)}
+                          onClick={() => setOpen(false)}
                         >
                           {item.title}
                         </span>
@@ -134,18 +134,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   onChange={(e) => setNewProject(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleAddProject()}
                   className="mb-1"
+                  disabled={loading}
                 />
                 <button
                   onClick={handleAddProject}
                   className="px-2 py-1 rounded bg-primary cursor-pointer"
                 >
-                  Add
+                  {loading ? "Adding.." : "Add"}
                 </button>
                 <button
                   onClick={() => {
                     setOpen(false);
                     setShowInput(false);
                   }}
+                  disabled={loading}
                   className="px-2 py-1 rounded hover:bg-destructive ml-1 cursor-pointer"
                 >
                   Cancel
@@ -165,7 +167,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     }`}
                   >
                     <NavLink
-                      to={project.url!}
+                      to={project.url! || `/projects/${project.title}`}
                       className="flex-1"
                       onClick={() => {
                         setOpen(false);
