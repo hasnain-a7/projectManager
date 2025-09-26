@@ -1,6 +1,5 @@
 import * as React from "react";
 import { NavLink } from "react-router-dom";
-
 import { MdDashboardCustomize } from "react-icons/md";
 import { IoHomeOutline } from "react-icons/io5";
 import { AiOutlinePlus, AiOutlineDelete } from "react-icons/ai";
@@ -22,6 +21,7 @@ import {
 import { useTaskContext } from "@/TaskContext/TaskContext";
 import { useUserContextId } from "@/AuthContext/UserContext";
 import SidebarFooter from "./sidebar-footer";
+import Loader from "./Loader";
 
 const items = [
   { title: "Home", url: "/home", icon: IoHomeOutline },
@@ -32,8 +32,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [showInput, setShowInput] = React.useState(false);
   const [newProject, setNewProject] = React.useState("");
   const { userContextId } = useUserContextId();
-  const { projects, fetchUserProjects, addProject, deleteProject } =
-    useTaskContext();
+  const {
+    projects,
+    fetchUserProjects,
+    addProject,
+    deleteProject,
+    loading,
+    setLoading,
+  } = useTaskContext();
   const { setOpen, state } = useSidebar();
 
   React.useEffect(() => {
@@ -47,9 +53,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const handleAddProject = async () => {
     if (!newProject.trim() || !userContextId) return;
-    await addProject(newProject, userContextId);
-    setNewProject("");
-    setShowInput(false);
+    setLoading(true);
+    try {
+      await addProject(newProject, userContextId);
+      setNewProject("");
+      setShowInput(false);
+    } catch (err) {
+      console.error("❌ Error adding project:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -85,7 +98,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         <item.icon className="cursor-pointer" size={32} />
                         <span
                           className="cursor-pointer "
-                          onClick={() => setShowInput(!showInput)}
+                          onClick={() => {
+                            setOpen(false);
+                            setShowInput(false);
+                          }}
                         >
                           {item.title}
                         </span>
@@ -98,7 +114,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
             <Separator className="my-2" />
 
-            {/* Projects Section */}
             <div
               className={`flex items-center justify-between text-4xl ${
                 state === "expanded" ? "flex-row" : "flex-col"
@@ -139,7 +154,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   onClick={handleAddProject}
                   className="px-2 py-1 rounded bg-primary cursor-pointer"
                 >
-                  Add
+                  {loading ? "Adding..." : "Add"}
                 </button>
                 <button
                   onClick={() => {
@@ -191,9 +206,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       )}
                     </NavLink>
 
-                    {!state && (
+                    {state == "expanded" && (
                       <button
-                        onClick={() => deleteProject(project.id!)}
+                        onClick={() =>
+                          deleteProject(project.id!, project.title)
+                        }
                         className="p-1 rounded hover:bg-red-500 hover:text-white ml-1 cursor-pointer"
                       >
                         <AiOutlineDelete size={16} />
@@ -203,7 +220,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 ))
               ) : (
                 <p className="text-sm text-gray-400">
-                  {state === "expanded" && "No projects yet. Add one!"}
+                  {state === "expanded" && projects.length === 0 && <Loader />}
                 </p>
               )}
             </SidebarMenu>

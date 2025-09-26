@@ -12,23 +12,18 @@ import { FaEdit } from "react-icons/fa";
 import type { Task } from "@/TaskContext/TaskContext";
 import { useTaskContext } from "@/TaskContext/TaskContext";
 import TodoModel from "./TodoModel";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+
 const TaskDetailsAccordion = ({
   task,
   projectTitle,
-  handleShowPop,
-  showPopup,
 }: {
   task: Task & { dueDate: string };
   projectTitle: string;
-  handleShowPop: (a: boolean) => void;
 }) => {
   const [showDetail, setShowDetail] = useState(false);
-  const [showEdit, setshowEdit] = useState(false);
   const { deleteTaskFromProject } = useTaskContext();
 
-  const handleEditClick = () => {
-    handleShowPop(true);
-  };
   const handleDelChange = async () => {
     try {
       if (window.confirm("Are you sure you want to delete this task?")) {
@@ -65,7 +60,7 @@ const TaskDetailsAccordion = ({
                 <div className="space-y-4 ">
                   <div className="w-full ">
                     <div className="flex justify-between items-center mb-2 ">
-                      <div className="flex  gap-0.5">
+                      <div className="flex gap-0.5">
                         <FileText className="h-4 w-4 mr-2 text-muted-foreground" />
                         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                           Description
@@ -79,34 +74,35 @@ const TaskDetailsAccordion = ({
                   </div>
                 </div>
               </div>
+
               <Eye
                 size={20}
                 onClick={() => setShowDetail(!showDetail)}
-                className="absolute top-2 right-2"
+                className="absolute top-2 right-2 cursor-pointer"
               />
-              <FaEdit
-                size={16}
-                onClick={handleEditClick}
-                className="absolute top-2 right-14"
-              />
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <FaEdit
+                    size={16}
+                    className="absolute top-2 right-14 cursor-pointer"
+                  />
+                </DialogTrigger>
+                <TodoModel projectTitle={projectTitle} taskToEdit={task} />
+              </Dialog>
+
               <MdDeleteOutline
                 size={18}
-                className="absolute top-2 right-8"
+                className="absolute top-2 right-8 cursor-pointer"
                 onClick={handleDelChange}
               />
             </div>
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+
       {showDetail && (
         <TaskDetailModal task={task} onClose={() => setShowDetail(false)} />
-      )}
-      {showPopup && (
-        <TodoModel
-          taskToEdit={task}
-          projectTitle={projectTitle}
-          showPopup={showPopup}
-        />
       )}
     </>
   );

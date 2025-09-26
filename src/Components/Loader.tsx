@@ -2,8 +2,8 @@ import React from "react";
 
 const Loader: React.FC = () => {
   return (
-    <div className="fixed inset-0 flex justify-center items-center z-50">
-      <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+    <div className={`flex items-center justify-center h-full `}>
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
     </div>
   );
 };

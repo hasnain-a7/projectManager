@@ -14,8 +14,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import TaskDetailsAccordion from "./TaskDetailsAccordion";
-
+import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
 import { useUserContextId } from "@/AuthContext/UserContext";
+import TodoModel from "./TodoModel";
 interface TaskAccordionTableProps {
   tasks: Task[];
   loading: boolean;
@@ -27,8 +28,6 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
   tasks,
   loading,
   projectTitle,
-  handleshowpop,
-  showPopup,
 }) => {
   const navigate = useNavigate();
   const userContextId = useUserContextId(); // get current userId
@@ -118,18 +117,26 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
 
             {!loading && (
               <div className="flex gap-2">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="cursor-pointer"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+
+                  <DialogContent>
+                    <TodoModel projectTitle={projectTitle} />
+                  </DialogContent>
+                </Dialog>
+
                 <Button
-                  variant="ghost"
                   size="sm"
                   className="cursor-pointer"
-                  onClick={handleshowpop}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  className="cursor-pointer"
-                  onClick={() => navigate("/")}
+                  onClick={() => navigate("/dashboard")}
                 >
                   View Trello
                 </Button>
@@ -176,8 +183,6 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
                             <TaskDetailsAccordion
                               task={task}
                               projectTitle={projectTitle}
-                              handleShowPop={handleshowpop}
-                              showPopup={showPopup}
                             />
                           </div>
                           <div className="col-span-2 flex items-center">
@@ -209,7 +214,6 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
                           <TaskDetailsAccordion
                             task={task}
                             projectTitle={projectTitle}
-                            handleShowPop={handleshowpop}
                           />
                           <div className="flex justify-between text-sm">
                             <span className="font-medium">Priority:</span>

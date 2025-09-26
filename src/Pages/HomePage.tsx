@@ -5,6 +5,7 @@ import { CheckCircle, Clock, FolderOpen } from "lucide-react";
 import { useTaskContext } from "@/TaskContext/TaskContext";
 import { useNavigate } from "react-router-dom";
 import { StatsCard } from "@/components/HomePageSatasCard";
+import Loader from "@/components/Loader";
 
 const HomePage = () => {
   const { projects, taskCache, loading } = useTaskContext();
@@ -22,9 +23,9 @@ const HomePage = () => {
       acc + project.tasks.filter((task) => task.status === "completed").length,
     0
   );
-  console.log("Total tasks in all projects:", totalTasks);
-  console.log("Total active tasks:", TotalActiveTasks);
-  console.log("Total completed tasks:", TotalCompletedTasks);
+  // console.log("Total tasks in all projects:", totalTasks);
+  // console.log("Total active tasks:", TotalActiveTasks);
+  // console.log("Total completed tasks:", TotalCompletedTasks);
 
   const navigate = useNavigate();
   const handleProjectClick = (projectId: string) => {
@@ -33,11 +34,7 @@ const HomePage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <Loader />;
   }
 
   return (
