@@ -19,6 +19,7 @@ export interface Task {
   title: string;
   todo: string;
   createdAt: string;
+  updatedAt?: string;
   status: string;
   attachments?: string[];
   dueDate?: string;
@@ -280,6 +281,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
       status?: string;
       attachments?: string[];
       dueDate?: string;
+      updatedAt?: string;
     }
   ): Promise<void> => {
     try {
@@ -308,7 +310,14 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
       // ✅ update local cache
       setTaskCache((prev) => {
         const tasks = prev[projectId]?.tasks.map((t) =>
-          t.id === taskId ? { ...t, ...updatedData, id: taskId } : t
+          t.id === taskId
+            ? {
+                ...t,
+                ...updatedData,
+                id: taskId,
+                updatedAt: new Date().toISOString(),
+              }
+            : t
         );
         return {
           ...prev,

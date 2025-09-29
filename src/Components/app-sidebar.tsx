@@ -66,11 +66,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   };
 
   return (
-    <Sidebar
-      collapsible="icon"
-      {...props}
-      className="flex flex-col h-full bg-background"
-    >
+    <Sidebar collapsible="icon" {...props} className="flex flex-col h-full ">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Main</SidebarGroupLabel>

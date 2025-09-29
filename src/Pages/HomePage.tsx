@@ -6,26 +6,44 @@ import { useTaskContext } from "@/TaskContext/TaskContext";
 import { useNavigate } from "react-router-dom";
 import { StatsCard } from "@/components/HomePageSatasCard";
 import Loader from "@/components/Loader";
+import LatestUpdatedTasks from "@/components/LatestUpdatedTasks";
 
 const HomePage = () => {
   const { projects, taskCache, loading } = useTaskContext();
-  const totalTasks = Object.values(taskCache).reduce(
-    (acc, project) => acc + project.tasks.length,
-    0
-  );
-  const TotalActiveTasks = Object.values(taskCache).reduce(
-    (acc, project) =>
-      acc + project.tasks.filter((task) => task.status === "active").length,
-    0
-  );
-  const TotalCompletedTasks = Object.values(taskCache).reduce(
-    (acc, project) =>
-      acc + project.tasks.filter((task) => task.status === "completed").length,
-    0
-  );
-  // console.log("Total tasks in all projects:", totalTasks);
-  // console.log("Total active tasks:", TotalActiveTasks);
-  // console.log("Total completed tasks:", TotalCompletedTasks);
+
+  const totalTasks = useMemo(() => {
+    return Object.values(taskCache).reduce(
+      (acc, project) => acc + project.tasks.length,
+      0
+    );
+  }, [taskCache]);
+
+  const totalActiveTasks = useMemo(() => {
+    return Object.values(taskCache).reduce(
+      (acc, project) =>
+        acc + project.tasks.filter((task) => task.status === "active").length,
+      0
+    );
+  }, [taskCache]);
+
+  const totalCompletedTasks = useMemo(() => {
+    return Object.values(taskCache).reduce(
+      (acc, project) =>
+        acc +
+        project.tasks.filter((task) => task.status === "completed").length,
+      0
+    );
+  }, [taskCache]);
+
+  const latestTasks = useMemo(() => {
+    return Object.values(taskCache)
+      .flatMap((project) => project.tasks)
+      .filter((task) => task.updatedAt)
+      .sort(
+        (a, b) =>
+          new Date(b.updatedAt!).getTime() - new Date(a.updatedAt!).getTime()
+      );
+  }, [taskCache]);
 
   const navigate = useNavigate();
   const handleProjectClick = (projectId: string) => {
@@ -40,8 +58,8 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="flex flex-1">
-        <main className="max-w-7xl mx-auto p-6 flex-1">
-          <section className="mb-8">
+        <main className="max-w-7xl mx-auto p-3 flex-1">
+          <section className="mb-5">
             <div className="grid auto-rows-min gap-4 md:grid-cols-4">
               <StatsCard
                 title="Projects"
@@ -57,13 +75,13 @@ const HomePage = () => {
               />
               <StatsCard
                 title="Active"
-                value={TotalActiveTasks}
+                value={totalActiveTasks}
                 icon={Clock}
                 color="bg-gradient-to-br from-yellow-500 to-yellow-600"
               />
               <StatsCard
                 title="Completed"
-                value={TotalCompletedTasks}
+                value={totalCompletedTasks}
                 icon={CheckCircle}
                 color="bg-gradient-to-br from-fuchsia-400 to-fuchsia-500"
               />
@@ -71,7 +89,7 @@ const HomePage = () => {
           </section>
 
           <section>
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-3">
               <h2 className="text-2xl font-semibold">My Projects</h2>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-sm">
@@ -83,15 +101,19 @@ const HomePage = () => {
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {projects.map((project) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  tasks={taskCache[project?.id]?.tasks || []}
-                  onClick={handleProjectClick}
-                />
-              ))}
+            <div className="flex gap-2">
+              <div className="w-3/4 h-min grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+                {projects.map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    tasks={taskCache[project?.id]?.tasks || []}
+                    onClick={handleProjectClick}
+                  />
+                ))}
+              </div>
+
+              <LatestUpdatedTasks latestTasks={latestTasks} />
             </div>
           </section>
         </main>

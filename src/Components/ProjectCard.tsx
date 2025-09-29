@@ -55,7 +55,7 @@ export const ProjectCard = ({ project, tasks, onClick }: ProjectCardProps) => {
 
   return (
     <Card
-      className="w-full py-4  border border-border/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
+      className="w-full py-4  border border-border/50 rounded-b-md shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
       onClick={handleCardClick}
     >
       <CardHeader className="">
