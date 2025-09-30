@@ -9,7 +9,6 @@ import {
   deleteDoc,
   updateDoc,
   doc,
-  serverTimestamp,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
@@ -31,6 +30,7 @@ export interface Task {
 export interface Project {
   id?: string;
   title: string;
+  discription?: string;
   url?: string;
   userId?: string;
   createdAt?: string;
@@ -140,7 +140,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
       title: title.trim().toLowerCase(),
       userId,
       url: `/projects/${title.trim().toLowerCase().replace(/\s+/g, "-")}`,
-      createdAt: serverTimestamp(),
+      createdAt: new Date().toISOString(),
     };
 
     const docRef = await addDoc(collection(db, "Projects"), projectData);
@@ -156,6 +156,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const deleteProject = async (projectId: string, projectTitle?: string) => {
     try {
+      setLoading(true);
       const confirmed = window.confirm(
         `Are you sure you want to delete project "${projectTitle || ""}"?`
       );
@@ -166,6 +167,8 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
       console.log("🗑️ Project deleted:", projectId);
     } catch (err) {
       console.error("❌ Error deleting project:", err);
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -2,7 +2,7 @@ import * as React from "react";
 import { NavLink } from "react-router-dom";
 import { MdDashboardCustomize } from "react-icons/md";
 import { IoHomeOutline } from "react-icons/io5";
-import { AiOutlinePlus, AiOutlineDelete } from "react-icons/ai";
+import { AiOutlinePlus, AiOutlineDelete, AiOutlineMenu } from "react-icons/ai";
 import { Separator } from "../components/ui/separator";
 
 import {
@@ -16,6 +16,7 @@ import {
   SidebarMenuItem,
   SidebarInput,
   useSidebar,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 
 import { useTaskContext } from "@/TaskContext/TaskContext";
@@ -66,41 +67,53 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   };
 
   return (
-    <Sidebar collapsible="icon" {...props} className="flex flex-col h-full ">
+    <Sidebar
+      collapsible="icon"
+      {...props}
+      className="flex flex-col h-full bg-sidebar"
+    >
+      <div className="md:hidden flex items-center justify-between p-2 border-b">
+        <span className="font-semibold">Menu</span>
+        <SidebarTrigger />
+      </div>
+
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Main</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem
                   key={item.title}
-                  className={`flex items-center justify-between text-4xl ${
-                    state === "expanded" ? "flex-row" : "flex-col"
-                  }`}
+                  className={`flex ${
+                    state === "expanded"
+                      ? "flex-row"
+                      : "flex-col items-center justify-center ml-2 "
+                  } items-center`}
                 >
                   <NavLink
                     to={item.url}
-                    className={`${state === "expanded" ? "w-full" : ""}`}
+                    className="w-full"
+                    onClick={() => {
+                      setOpen(false);
+                      setShowInput(false);
+                    }}
                   >
                     {({ isActive }) => (
                       <SidebarMenuButton
                         tooltip={item.title}
                         isActive={isActive}
-                        className={`flex items-center gap-2 w-full ${
-                          isActive ? "bg-primary text-white" : ""
-                        }`}
+                        className={`flex items-center gap-3 px-2 py-1 rounded-md transition-colors ${
+                          isActive
+                            ? "bg-primary text-white"
+                            : "hover:bg-sidebar-accent hover:text-foreground"
+                        } `}
                       >
-                        <item.icon className="cursor-pointer" size={32} />
-                        <span
-                          className="cursor-pointer "
-                          onClick={() => {
-                            setOpen(false);
-                            setShowInput(false);
-                          }}
-                        >
-                          {item.title}
-                        </span>
+                        <item.icon size={22} />
+                        {state === "expanded" && (
+                          <span className="text-sm font-medium">
+                            {item.title}
+                          </span>
+                        )}
                       </SidebarMenuButton>
                     )}
                   </NavLink>
@@ -108,62 +121,68 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               ))}
             </SidebarMenu>
 
-            <Separator className="my-2" />
+            <Separator className="my-3" />
 
             <div
-              className={`flex items-center justify-between text-4xl ${
-                state === "expanded" ? "flex-row" : "flex-col"
+              className={`flex items-center ${
+                state === "expanded"
+                  ? "justify-between px-0.5"
+                  : "justify-center flex-col"
               }`}
             >
-              {state === "collapsed" ? (
-                <button
-                  onClick={handleAddClick}
-                  className="p-2 mb-1 rounded hover:bg-sidebar-accent cursor-pointer"
-                  title="Add Project"
-                >
-                  <AiOutlinePlus size={20} />
-                </button>
-              ) : (
+              {state === "expanded" ? (
                 <>
-                  <SidebarGroupLabel>Projects</SidebarGroupLabel>
+                  <SidebarGroupLabel className="text-xs uppercase text-muted-foreground tracking-wide">
+                    Projects
+                  </SidebarGroupLabel>
                   <button
                     onClick={() => setShowInput(!showInput)}
-                    className="p-1 rounded hover:bg-sidebar-accent cursor-pointer"
+                    className="p-1 rounded hover:bg-sidebar-accent"
                     title="Add Project"
                   >
                     <AiOutlinePlus size={18} />
                   </button>
                 </>
+              ) : (
+                <button
+                  onClick={handleAddClick}
+                  className="p-2 mb-1 rounded hover:bg-sidebar-accent"
+                  title="Add Project"
+                >
+                  <AiOutlinePlus size={20} />
+                </button>
               )}
             </div>
 
             {showInput && state === "expanded" && (
-              <div className="px-2 my-2">
+              <div className="px-3 my-2 space-y-2">
                 <SidebarInput
                   placeholder="New project..."
                   value={newProject}
                   onChange={(e) => setNewProject(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleAddProject()}
-                  className="mb-1"
                 />
-                <button
-                  onClick={handleAddProject}
-                  className="px-2 py-1 rounded bg-primary cursor-pointer"
-                >
-                  {loading ? "Adding..." : "Add"}
-                </button>
-                <button
-                  onClick={() => {
-                    setOpen(false);
-                    setShowInput(false);
-                  }}
-                  className="px-2 py-1 rounded hover:bg-destructive ml-1 cursor-pointer"
-                >
-                  Cancel
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleAddProject}
+                    className="px-3 py-1 text-sm rounded bg-primary text-white hover:bg-primary/90"
+                  >
+                    {loading ? "Adding..." : "Add"}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setOpen(false);
+                      setShowInput(false);
+                    }}
+                    className="px-3 py-1 text-sm rounded bg-muted hover:bg-destructive hover:text-white"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             )}
 
+            {/* Project list */}
             <SidebarMenu>
               {projects.length > 0 ? (
                 projects.map((project) => (
@@ -172,7 +191,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     className={`flex items-center justify-between ${
                       state === "expanded"
                         ? "flex-row"
-                        : "flex-col text-4xl w-full cursor-pointer"
+                        : "flex-col w-full justify-center text-lg"
                     }`}
                   >
                     <NavLink
@@ -187,13 +206,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         <SidebarMenuButton
                           tooltip={project.title}
                           isActive={isActive}
-                          className={`flex items-center justify-between ${
+                          className={`flex items-center ${
                             state === "expanded"
-                              ? "flex-row"
-                              : "flex-col gap-1 p-1 rounded hover:bg-sidebar-accent cursor-pointer"
-                          } ${isActive ? "bg-primary" : ""}`}
+                              ? "gap-2 px-2 py-1"
+                              : "flex-col gap-1 p-1 justify-center"
+                          } rounded-md transition-colors ${
+                            isActive
+                              ? "bg-primary text-white"
+                              : "hover:bg-sidebar-accent hover:text-foreground"
+                          }`}
                         >
-                          <span className="cursor-pointer">
+                          <span className="text-sm font-medium">
                             {state === "collapsed"
                               ? project.title[0] + project.title.slice(-1)
                               : project.title}
@@ -202,12 +225,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       )}
                     </NavLink>
 
-                    {state == "expanded" && (
+                    {state === "expanded" && (
                       <button
                         onClick={() =>
                           deleteProject(project.id!, project.title)
                         }
-                        className="p-1 rounded hover:bg-red-500 hover:text-white ml-1 cursor-pointer"
+                        className="p-1 ml-1 text-muted-foreground hover:bg-red-500 hover:text-white rounded"
                       >
                         <AiOutlineDelete size={16} />
                       </button>
@@ -215,9 +238,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </SidebarMenuItem>
                 ))
               ) : (
-                <p className="text-sm text-gray-400">
-                  {state === "expanded" && projects.length === 0 && <Loader />}
-                </p>
+                <div className="px-3 py-2 text-sm text-muted-foreground">
+                  {state === "expanded" ? <Loader /> : null}
+                </div>
               )}
             </SidebarMenu>
           </SidebarGroupContent>

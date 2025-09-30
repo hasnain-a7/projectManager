@@ -114,9 +114,10 @@ const TodoModel: React.FC<TodoModelProps> = ({ projectTitle, taskToEdit }) => {
         />
         <Textarea
           placeholder="Enter description"
-          rows={4}
+          rows={6}
           value={formData.todo}
           onChange={(e) => setFormData({ ...formData, todo: e.target.value })}
+          className=" h-32  overflow custom-scroll "
         />
         <div className="grid grid-cols-2 gap-2">
           <Select

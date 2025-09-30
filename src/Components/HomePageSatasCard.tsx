@@ -1,26 +1,48 @@
 import { Card, CardContent } from "./ui/card";
 import { cn } from "@/lib/utils";
+
+interface StatsCardProps {
+  title: string;
+  value: string | number;
+  description?: string;
+  icon?: React.ElementType;
+  color?: string;
+}
+
 export const StatsCard = ({
   title,
   value,
   description,
   icon: Icon,
   color = "bg-primary",
-}: {
-  title: string;
-  value: string | number;
-  description?: string;
-  icon?: React.ElementType;
-  color?: string;
-}) => (
-  <Card className={cn("rounded-xl text-white overflow-hidden", color)}>
-    <CardContent className="p-6">
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="text-lg font-medium opacity-90">{title}</h3>
-        {Icon && <Icon className="w-6 h-6 opacity-75" />}
-      </div>
-      <div className="text-3xl font-bold mb-1">{value}</div>
-      {description && <p className="text-sm opacity-75">{description}</p>}
-    </CardContent>
-  </Card>
-);
+}: StatsCardProps) => {
+  return (
+    <Card
+      className={cn(
+        "rounded-2xl shadow-md overflow-hidden transition-transform hover:scale-[1.01] duration-300",
+        color
+      )}
+    >
+      <CardContent className="p-3 sm:p-3">
+        <div className="flex items-center justify-between mb-2 sm:mb-2">
+          <h3 className="text-base sm:text-lg font-semibold text-white/90">
+            {title}
+          </h3>
+          {Icon && (
+            <div className="p-1.5 sm:p-2 bg-white/20 rounded-full">
+              <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white/80" />
+            </div>
+          )}
+        </div>
+        <div className="text-2xl sm:text-4xl font-extrabold text-white mb-1 sm:mb-2">
+          {value}
+        </div>
+        {description && (
+          <p className="text-xs sm:text-sm text-white/75 leading-relaxed">
+            {description}
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+};

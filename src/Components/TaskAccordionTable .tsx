@@ -106,13 +106,15 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
   });
 
   return (
-    <div className="min-h-full w-full">
-      <Card className="shadow-sm rounded-2xl ">
+    <div className="min-h-full w-full p-0">
+      <Card className=" border border-border/40 rounded-lg shadow-sm hover:shadow-md hover:border-border transition-all duration-300 cursor-pointer">
         <CardHeader>
           <CardTitle className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 text-lg">
             <div className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-primary" />
-              <h4 className="font-semibold">{projectTitle}'s Tasks</h4>
+              <h4 className="font-semibold">
+                {projectTitle.toUpperCase()}'s Tasks
+              </h4>
             </div>
 
             {!loading && (
@@ -179,7 +181,7 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
                     {section.tasks.map((task) => (
                       <div key={task.id} className="border-b bg-card">
                         <div className="hidden sm:grid grid-cols-12 gap-2 py-2 items-center">
-                          <div className="col-span-5">
+                          <div className="col-span-5 ">
                             <TaskDetailsAccordion
                               task={task}
                               projectTitle={projectTitle}

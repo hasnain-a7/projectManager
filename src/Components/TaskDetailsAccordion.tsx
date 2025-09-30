@@ -78,14 +78,14 @@ const TaskDetailsAccordion = ({
               <Eye
                 size={20}
                 onClick={() => setShowDetail(!showDetail)}
-                className="absolute top-2 right-2 cursor-pointer"
+                className="absolute top-2 right-2 text-muted-foreground hover:text-primary cursor-pointer"
               />
 
               <Dialog>
                 <DialogTrigger asChild>
                   <FaEdit
                     size={16}
-                    className="absolute top-2 right-14 cursor-pointer"
+                    className="absolute top-2 right-14 text-muted-foreground hover:text-primary cursor-pointer"
                   />
                 </DialogTrigger>
                 <TodoModel projectTitle={projectTitle} taskToEdit={task} />
@@ -93,7 +93,7 @@ const TaskDetailsAccordion = ({
 
               <MdDeleteOutline
                 size={18}
-                className="absolute top-2 right-8 cursor-pointer"
+                className="absolute top-2 right-8 text-muted-foreground hover:text-primary cursor-pointer"
                 onClick={handleDelChange}
               />
             </div>
