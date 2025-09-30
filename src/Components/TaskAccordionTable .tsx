@@ -14,8 +14,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import TaskDetailsAccordion from "./TaskDetailsAccordion";
-
+import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
 import { useUserContextId } from "@/AuthContext/UserContext";
+import TodoModel from "./TodoModel";
 interface TaskAccordionTableProps {
   tasks: Task[];
   loading: boolean;
@@ -27,7 +28,6 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
   tasks,
   loading,
   projectTitle,
-  handleshowpop,
 }) => {
   const navigate = useNavigate();
   const userContextId = useUserContextId();
@@ -106,25 +106,35 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
   });
 
   return (
-    <div className="min-h-full w-full">
-      <Card className="shadow-sm rounded-2xl ">
+    <div className="min-h-full w-full p-0">
+      <Card className=" border border-border/40 rounded-lg shadow-sm hover:shadow-md hover:border-border transition-all duration-300 cursor-pointer">
         <CardHeader>
           <CardTitle className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 text-lg">
             <div className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-primary" />
-              <h4 className="font-semibold">{projectTitle}'s Tasks</h4>
+              <h4 className="font-semibold">
+                {projectTitle.toUpperCase()}'s Tasks
+              </h4>
             </div>
 
             {!loading && (
               <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="cursor-pointer"
-                  onClick={handleshowpop}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="cursor-pointer"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+
+                  <DialogContent>
+                    <TodoModel projectTitle={projectTitle} />
+                  </DialogContent>
+                </Dialog>
+
                 <Button
                   size="sm"
                   className="cursor-pointer"
@@ -171,8 +181,11 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
                     {section.tasks.map((task) => (
                       <div key={task.id} className="border-b bg-card">
                         <div className="hidden sm:grid grid-cols-12 gap-2 py-2 items-center">
-                          <div className="col-span-5">
-                            <TaskDetailsAccordion task={task} />
+                          <div className="col-span-5 ">
+                            <TaskDetailsAccordion
+                              task={task}
+                              projectTitle={projectTitle}
+                            />
                           </div>
                           <div className="col-span-2 flex items-center">
                             <Badge
@@ -200,7 +213,10 @@ const TaskAccordionTable: React.FC<TaskAccordionTableProps> = ({
                         </div>
 
                         <div className="sm:hidden flex flex-col gap-1 px-3 py-2">
-                          <TaskDetailsAccordion task={task} />
+                          <TaskDetailsAccordion
+                            task={task}
+                            projectTitle={projectTitle}
+                          />
                           <div className="flex justify-between text-sm">
                             <span className="font-medium">Priority:</span>
                             <Badge

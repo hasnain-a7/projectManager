@@ -14,6 +14,7 @@ import { auth } from "../Config/firbase";
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { useUserContextId } from "@/AuthContext/UserContext";
+import { ChevronUp } from "lucide-react";
 interface SidebarFooterProps {
   setopen: (open: boolean) => void;
   state: string;
@@ -49,6 +50,7 @@ const SidebarFooter: React.FC<SidebarFooterProps> = ({ setopen, state }) => {
           >
             <FaUser className="h-5 w-5" />
             {state === "expanded" && <h3>Account</h3>}
+            <ChevronUp className="ml-auto" />
           </SidebarMenuButton>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-44">

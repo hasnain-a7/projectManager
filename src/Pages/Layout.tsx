@@ -28,7 +28,7 @@ export default function Page() {
           </div> */}
         </header>
 
-        <div className="flex flex-1 flex-col   bg-muted text-foreground">
+        <div className="flex flex-1 flex-col  bg-muted text-foreground">
           <Outlet />
         </div>
       </SidebarInset>
