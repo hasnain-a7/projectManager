@@ -33,14 +33,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [showInput, setShowInput] = React.useState(false);
   const [newProject, setNewProject] = React.useState("");
   const { userContextId } = useUserContextId();
-  const {
-    projects,
-    fetchUserProjects,
-    addProject,
-    deleteProject,
-    loading,
-    setLoading,
-  } = useTaskContext();
+const { projects, fetchUserProjects, addProject, deleteProject, loading, setLoading } =
+  useTaskContext();
   const { setOpen, state } = useSidebar();
 
   React.useEffect(() => {
@@ -108,12 +102,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             : "hover:bg-sidebar-accent hover:text-foreground"
                         } `}
                       >
-                        <item.icon size={22} />
-                        {state === "expanded" && (
-                          <span className="text-sm font-medium">
-                            {item.title}
-                          </span>
-                        )}
+<item.icon
+  className="cursor-pointer"
+  size={22} // keep smaller size from dev for consistency
+/>
+{state === "expanded" && (
+  <span
+    className="text-sm font-medium cursor-pointer"
+    onClick={() => setOpen(false)} // keep main branch behavior
+  >
+    {item.title}
+  </span>
+)}
+
                       </SidebarMenuButton>
                     )}
                   </NavLink>
@@ -161,24 +162,27 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   value={newProject}
                   onChange={(e) => setNewProject(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleAddProject()}
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleAddProject}
-                    className="px-3 py-1 text-sm rounded bg-primary text-white hover:bg-primary/90"
-                  >
-                    {loading ? "Adding..." : "Add"}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setOpen(false);
-                      setShowInput(false);
-                    }}
-                    className="px-3 py-1 text-sm rounded bg-muted hover:bg-destructive hover:text-white"
-                  >
-                    Cancel
-                  </button>
-                </div>
+<div className="flex gap-2 mb-1">
+  <button
+    onClick={handleAddProject}
+    className="px-3 py-1 text-sm rounded bg-primary text-white hover:bg-primary/90 cursor-pointer"
+    disabled={loading}
+  >
+    {loading ? "Adding..." : "Add"}
+  </button>
+
+  <button
+    onClick={() => {
+      setOpen(false);
+      setShowInput(false);
+    }}
+    className="px-3 py-1 text-sm rounded bg-muted hover:bg-destructive hover:text-white cursor-pointer"
+    disabled={loading}
+  >
+    Cancel
+  </button>
+</div>
+
               </div>
             )}
 
@@ -195,7 +199,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     }`}
                   >
                     <NavLink
-                      to={project.url!}
+                      to={project.url! || `/projects/${project.title}`}
                       className="flex-1"
                       onClick={() => {
                         setOpen(false);

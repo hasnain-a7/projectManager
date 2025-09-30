@@ -12,7 +12,6 @@ import {
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
-// 🔹 Task type
 export interface Task {
   id?: string;
   title: string;
@@ -26,7 +25,6 @@ export interface Task {
   projectId?: string;
 }
 
-// 🔹 Project type
 export interface Project {
   id?: string;
   title: string;
@@ -37,7 +35,6 @@ export interface Project {
   dueDate?: string;
 }
 
-// 🔹 Context type
 interface TaskContextType {
   projects: Project[];
   setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
@@ -134,24 +131,35 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const addProject = async (title: string, userId: string) => {
-    if (!title.trim() || !userId) return "";
+    try {
+      setLoading(true);
 
-    const projectData = {
-      title: title.trim().toLowerCase(),
-      userId,
-      url: `/projects/${title.trim().toLowerCase().replace(/\s+/g, "-")}`,
-      createdAt: new Date().toISOString(),
-    };
+if (!title.trim() || !userId) return "";
 
-    const docRef = await addDoc(collection(db, "Projects"), projectData);
+const projectData = {
+  title: title.trim(), // keep trimming to avoid extra spaces
+  userId,
+  url: `/projects/${title.trim().toLowerCase().replace(/\s+/g, "-")}`,
+  createdAt: serverTimestamp(), // use serverTimestamp for consistent backend time
+};
 
-    setProjects((prev) => [
-      ...prev,
-      { id: docRef.id, ...projectData, createdAt: new Date().toISOString() },
-    ]);
 
-    console.log("✅ Project created:", projectData);
-    return docRef.id;
+      const docRef = await addDoc(collection(db, "Projects"), projectData);
+
+      console.log("✅ Project created:", projectData);
+      setProjects((prev) => [
+        ...prev,
+        { id: docRef.id, ...projectData, createdAt: new Date().toISOString() },
+      ]);
+      await fetchUserProjects(userId);
+
+      return docRef.id;
+    } catch (err) {
+      console.error("❌ Error creating project:", err);
+      return "";
+    } finally {
+      setLoading(false);
+    }
   };
 
   const deleteProject = async (projectId: string, projectTitle?: string) => {
@@ -184,7 +192,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   ): Promise<string> => {
     try {
-      const normalizedTitle = projectTitle.trim().toLowerCase();
+const normalizedTitle = projectTitle.trim().toLowerCase();
 
       const q = query(
         collection(db, "Projects"),
@@ -208,7 +216,8 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
         status: formData.status,
         attachments: formData.attachments || [],
         createdAt: new Date().toISOString(),
-        userId,
+userId,
+
         dueDate: formData.dueDate,
       };
 

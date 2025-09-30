@@ -57,16 +57,39 @@ export const ProjectCard = ({ project, tasks, onClick }: ProjectCardProps) => {
   };
 
   return (
-    <Card className="w-full relative py-3 border border-border/40 rounded-lg shadow-sm hover:shadow-md hover:border-border transition-all duration-300 cursor-pointer">
-      <Eye
-        className="absolute top-3 right-2 text-muted-foreground hover:text-primary cursor-pointer"
-        size={20}
-        onClick={handleCardClick}
-      />
-      <CardContent className="space-y-2 -ml-3">
-        <CardTitle className="text-base font-semibold line-clamp-2 -mt-2">
-          {project.title}
-        </CardTitle>
+<Card
+  className="w-full relative py-4 border border-border/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
+  onClick={handleCardClick}
+>
+  <CardHeader>
+    <div className="flex justify-between items-start">
+      {/* Badge from main branch */}
+      <Badge variant="outline" className="text-xs font-medium">
+        {project?.label || "Personal"}
+      </Badge>
+
+      <div className="flex items-center gap-2">
+        {/* Eye icon from dev branch */}
+        <Eye
+          className="text-muted-foreground hover:text-primary cursor-pointer"
+          size={20}
+          onClick={(e) => {
+            e.stopPropagation(); // prevents card click
+            handleCardClick();
+          }}
+        />
+        {/* More button from main branch */}
+        <button className="text-muted-foreground hover:text-foreground">
+          <MoreHorizontal className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  </CardHeader>
+
+  <CardContent className="space-y-3 -ml-3">
+    <CardTitle className="text-base font-semibold line-clamp-2 -mt-2">
+      {project?.title}
+    </CardTitle>
 
         {
           <p className="text-sm text-muted-foreground line-clamp-2">

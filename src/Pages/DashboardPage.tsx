@@ -6,10 +6,8 @@ import { updateDoc, doc } from "firebase/firestore";
 
 const DashboardPage: React.FC = () => {
   const { taskCache } = useTaskContext();
-
   const [statusTasks, setStatusTasks] = useState<{ [key: string]: any[] }>({});
   const [loading, setLoading] = useState(true);
-
   const statuses = ["backlog", "pending", "active", "inactive", "completed"];
 
   useEffect(() => {
@@ -37,7 +35,6 @@ const DashboardPage: React.FC = () => {
     newStatus: string
   ) => {
     try {
-      // Find projectId for task
       const projectId = Object.keys(taskCache).find((pid) =>
         taskCache[pid].tasks.some((t) => t.id === taskId)
       );

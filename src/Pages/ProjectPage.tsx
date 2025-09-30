@@ -31,7 +31,6 @@ const ProjectPage: React.FC = () => {
       const newTask: Task = {
         id: taskId,
         ...formData,
-
         userId,
       };
 
@@ -53,7 +52,12 @@ const ProjectPage: React.FC = () => {
     <div className="min-h-screen w-full p-2 space-y-4 flex flex-col bg-background text-foreground">
       <div className="flex-1 overflow-auto">
         {loading ? (
-          <Loader />
+<div className="flex flex-col justify-center items-center h-full py-20">
+  <Loader /> {/* Optional loader from dev branch */}
+  <span className="text-muted-foreground text-lg mt-2">
+    Loading tasks...
+  </span>
+</div>
         ) : (
           <TaskAccordionTable
             tasks={specificTasks}
